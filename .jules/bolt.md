@@ -1,0 +1,3 @@
+## 2025-05-21 - Optimizing large grids with Context and Memo
+**Learning:** In pages with many repeated components (like 40+ SVGs), changing a shared state at the root (like a command prefix) causes all components to re-render. Even with simple SVGs, React's reconciliation for 40+ components can be improved. Using a combination of React.memo for the items and React Context for the frequently changing state allows skipping re-renders for most of the card (SVG, titles) and only re-rendering the specific button that needs the state.
+**Action:** Use Context to "bridge" frequently changing state to deep children in large lists, combined with React.memo on the list items to avoid re-rendering the static parts of the card.

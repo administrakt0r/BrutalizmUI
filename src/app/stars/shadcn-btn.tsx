@@ -11,7 +11,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-export default function ShadcnBtn({ command }: { command: string }) {
+import { usePackageManager } from "./package-manager-context"
+
+export default function ShadcnBtn({ id }: { id: string }) {
+  const commandPrefix = usePackageManager()
+  const command = `${commandPrefix}${id}.json`
+
   const [copied, setCopied] = useState(false)
 
   const handleCopy = () => {

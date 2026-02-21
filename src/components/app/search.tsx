@@ -18,18 +18,18 @@ import {
   CommandSeparator,
 } from "@/components/ui/command"
 
-export default function Search() {
-  const DOCS_LINKS = [
-    {
-      heading: "Getting started",
-      links: [...GETTING_STARTED_LINKS],
-    },
-    {
-      heading: "Components",
-      links: [...COMPONENTS_LINKS],
-    },
-  ]
+const DOCS_LINKS = [
+  {
+    heading: "Getting started",
+    links: [...GETTING_STARTED_LINKS],
+  },
+  {
+    heading: "Components",
+    links: [...COMPONENTS_LINKS],
+  },
+]
 
+export default function Search() {
   const router = useRouter()
 
   const [open, setOpen] = useState(false)
