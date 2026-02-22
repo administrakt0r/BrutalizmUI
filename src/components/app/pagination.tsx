@@ -29,19 +29,19 @@ export default function Pagination({ prev, next }: Props) {
   return (
     <div className={`${justifyContent} flex w-full items-center`}>
       {prev?.name && (
-        <Link href={prev.path}>
+        <Link href={prev.path} aria-label={`Previous page: ${prev.name}`}>
           <Button className="sm:px-5 px-3.5 py-2 h-[unset] sm:text-sm text-xs">
-            <ArrowLeft />
+            <ArrowLeft aria-hidden="true" />
             {prev.name}
           </Button>
         </Link>
       )}
 
       {next?.name && (
-        <Link href={next.path}>
+        <Link href={next.path} aria-label={`Next page: ${next.name}`}>
           <Button className="sm:px-5 px-3.5 py-2 h-[unset] sm:text-sm text-xs">
             {next.name}
-            <ArrowRight />
+            <ArrowRight aria-hidden="true" />
           </Button>
         </Link>
       )}

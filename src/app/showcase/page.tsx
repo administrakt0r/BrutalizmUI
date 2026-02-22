@@ -2,6 +2,7 @@ import { Metadata } from "next"
 
 import SHOWCASE from "@/data/showcase"
 
+import { ErrorBoundary } from "@/components/app/error-boundary"
 import {
   PageDescription,
   PageHeader,
@@ -13,6 +14,9 @@ import ShowcaseContainer from "@/components/app/showcase-container"
 export const metadata: Metadata = {
   title: "Showcase",
   description: "Showcase of websites built with BrutalizmUI.",
+  alternates: {
+    canonical: "/showcase",
+  },
 }
 
 export default function Page() {
@@ -28,6 +32,7 @@ export default function Page() {
           <a
             className="underline"
             target="_blank"
+            rel="noopener noreferrer"
             href="https://x.com/samuelbreznjak"
           >
             dm me
@@ -40,7 +45,9 @@ export default function Page() {
         </PageDescription>
       </PageHeader>
 
-      <ShowcaseContainer items={SHOWCASE} />
+      <ErrorBoundary>
+        <ShowcaseContainer items={SHOWCASE} />
+      </ErrorBoundary>
     </PageWrapper>
   )
 }

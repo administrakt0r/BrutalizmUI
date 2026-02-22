@@ -6,11 +6,13 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+export type ScrollAreaProps = React.ComponentProps<typeof ScrollAreaPrimitive.Root>
+
 function ScrollArea({
   className,
   children,
   ...props
-}: React.ComponentProps<typeof ScrollAreaPrimitive.Root>) {
+}: ScrollAreaProps) {
   return (
     <ScrollAreaPrimitive.Root
       data-slot="scroll-area"
@@ -26,11 +28,17 @@ function ScrollArea({
   )
 }
 
+ScrollArea.displayName = "ScrollArea"
+
+export type ScrollBarProps = React.ComponentProps<
+  typeof ScrollAreaPrimitive.ScrollAreaScrollbar
+>
+
 function ScrollBar({
   className,
   orientation = "vertical",
   ...props
-}: React.ComponentProps<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>) {
+}: ScrollBarProps) {
   return (
     <ScrollAreaPrimitive.ScrollAreaScrollbar
       data-slot="scroll-area-scrollbar"
@@ -49,5 +57,7 @@ function ScrollBar({
     </ScrollAreaPrimitive.ScrollAreaScrollbar>
   )
 }
+
+ScrollBar.displayName = "ScrollBar"
 
 export { ScrollArea, ScrollBar }

@@ -30,5 +30,6 @@ function Progress({
     </ProgressPrimitive.Root>
   )
 }
+Progress.displayName = "Progress"
 
 export { Progress }

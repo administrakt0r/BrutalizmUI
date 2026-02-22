@@ -31,7 +31,7 @@ export default function FormDemo() {
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
+    //
   }
 
   return (

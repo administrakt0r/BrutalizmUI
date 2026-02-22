@@ -19,6 +19,7 @@ function RadioGroup({
     />
   )
 }
+RadioGroup.displayName = "RadioGroup"
 
 function RadioGroupItem({
   className,
@@ -39,5 +40,6 @@ function RadioGroupItem({
     </RadioGroupPrimitive.Item>
   )
 }
+RadioGroupItem.displayName = "RadioGroupItem"
 
 export { RadioGroup, RadioGroupItem }

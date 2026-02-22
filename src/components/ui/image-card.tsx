@@ -1,12 +1,14 @@
+import Image from "next/image"
+
 import { cn } from "@/lib/utils"
 
-type Props = {
+export type ImageCardProps = {
   imageUrl: string
   caption: string
   className?: string
 }
 
-export default function ImageCard({ imageUrl, caption, className }: Props) {
+function ImageCard({ imageUrl, caption, className }: ImageCardProps) {
   return (
     <figure
       className={cn(
@@ -14,10 +16,22 @@ export default function ImageCard({ imageUrl, caption, className }: Props) {
         className,
       )}
     >
-      <img className="w-full aspect-4/3" src={imageUrl} alt="image" />
+      <div className="relative aspect-4/3 w-full">
+        <Image
+          className="object-cover"
+          src={imageUrl}
+          alt={caption}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        />
+      </div>
       <figcaption className="border-t-2 text-main-foreground border-border p-4">
         {caption}
       </figcaption>
     </figure>
   )
 }
+
+ImageCard.displayName = "ImageCard"
+
+export { ImageCard }

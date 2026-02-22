@@ -8,6 +8,11 @@ import { ArrowLeft, ArrowRight } from "lucide-react"
 import * as React from "react"
 
 import { Button } from "@/components/ui/button"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 import { cn } from "@/lib/utils"
 
@@ -16,7 +21,7 @@ type UseCarouselParameters = Parameters<typeof useEmblaCarousel>
 type CarouselOptions = UseCarouselParameters[0]
 type CarouselPlugin = UseCarouselParameters[1]
 
-type CarouselProps = {
+export type CarouselProps = React.ComponentProps<"div"> & {
   opts?: CarouselOptions
   plugins?: CarouselPlugin
   orientation?: "horizontal" | "vertical"
@@ -53,7 +58,7 @@ function Carousel({
   className,
   children,
   ...props
-}: React.ComponentProps<"div"> & CarouselProps) {
+}: CarouselProps) {
   const [carouselRef, api] = useEmblaCarousel(
     {
       ...opts,
@@ -144,7 +149,11 @@ function Carousel({
   )
 }
 
-function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
+Carousel.displayName = "Carousel"
+
+export type CarouselContentProps = React.ComponentProps<"div">
+
+function CarouselContent({ className, ...props }: CarouselContentProps) {
   const { carouselRef, orientation } = useCarousel()
 
   return (
@@ -165,7 +174,11 @@ function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-function CarouselItem({ className, ...props }: React.ComponentProps<"div">) {
+CarouselContent.displayName = "CarouselContent"
+
+export type CarouselItemProps = React.ComponentProps<"div">
+
+function CarouselItem({ className, ...props }: CarouselItemProps) {
   const { orientation } = useCarousel()
 
   return (
@@ -183,65 +196,89 @@ function CarouselItem({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+CarouselItem.displayName = "CarouselItem"
+
+export type CarouselPreviousProps = React.ComponentProps<typeof Button>
+
 function CarouselPrevious({
   className,
   variant = "noShadow",
   size = "icon",
   ...props
-}: React.ComponentProps<typeof Button>) {
+}: CarouselPreviousProps) {
   const { orientation, scrollPrev, canScrollPrev } = useCarousel()
 
   return (
-    <Button
-      data-slot="carousel-previous"
-      variant={variant}
-      size={size}
-      className={cn(
-        "absolute size-8 rounded-base",
-        orientation === "horizontal"
-          ? "top-1/2 -left-12 -translate-y-1/2"
-          : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
-        className,
-      )}
-      disabled={!canScrollPrev}
-      onClick={scrollPrev}
-      {...props}
-    >
-      <ArrowLeft />
-      <span className="sr-only">Previous slide</span>
-    </Button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          data-slot="carousel-previous"
+          variant={variant}
+          size={size}
+          className={cn(
+            "absolute size-8 rounded-base",
+            orientation === "horizontal"
+              ? "top-1/2 -left-12 -translate-y-1/2"
+              : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
+            className,
+          )}
+          disabled={!canScrollPrev}
+          onClick={scrollPrev}
+          {...props}
+        >
+          <ArrowLeft />
+          <span className="sr-only">Previous slide</span>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>Previous slide</p>
+      </TooltipContent>
+    </Tooltip>
   )
 }
+
+CarouselPrevious.displayName = "CarouselPrevious"
+
+export type CarouselNextProps = React.ComponentProps<typeof Button>
 
 function CarouselNext({
   className,
   variant = "noShadow",
   size = "icon",
   ...props
-}: React.ComponentProps<typeof Button>) {
+}: CarouselNextProps) {
   const { orientation, scrollNext, canScrollNext } = useCarousel()
 
   return (
-    <Button
-      data-slot="carousel-next"
-      variant={variant}
-      size={size}
-      className={cn(
-        "absolute h-8 w-8 rounded-base",
-        orientation === "horizontal"
-          ? "-right-12 top-1/2 -translate-y-1/2"
-          : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
-        className,
-      )}
-      disabled={!canScrollNext}
-      onClick={scrollNext}
-      {...props}
-    >
-      <ArrowRight />
-      <span className="sr-only">Next slide</span>
-    </Button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          data-slot="carousel-next"
+          variant={variant}
+          size={size}
+          className={cn(
+            "absolute h-8 w-8 rounded-base",
+            orientation === "horizontal"
+              ? "-right-12 top-1/2 -translate-y-1/2"
+              : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
+            className,
+          )}
+          disabled={!canScrollNext}
+          onClick={scrollNext}
+          {...props}
+        >
+          <ArrowRight />
+          <span className="sr-only">Next slide</span>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>Next slide</p>
+      </TooltipContent>
+    </Tooltip>
   )
 }
+
+CarouselNext.displayName = "CarouselNext"
 
 export {
   type CarouselApi,

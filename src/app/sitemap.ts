@@ -1,19 +1,11 @@
+import { docs } from "@docs"
+
 import { MetadataRoute } from "next"
-
-import COMPONENTS from "@/data/components"
-
-import { transformToSlug } from "@/lib/utils"
 
 const root = "https://brutalizmui.pages.dev"
 
-const DOCS_PAGES = [
-  "/docs",
-  "/docs/resources",
-  "/docs/figma",
-  "/docs/changelog",
-  "/docs/installation",
-  "/docs/stars",
-  "/docs/migrating-from-v3",
+const STATIC_PAGES = [
+  "/",
   "/templates",
   "/showcase",
   "/stars",
@@ -22,21 +14,24 @@ const DOCS_PAGES = [
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
-    {
-      url: root,
-      lastModified: new Date(),
-      priority: 1,
-    },
-    ...DOCS_PAGES.map((page) => ({
-      url: root + page,
-      lastModified: new Date(),
-      priority: 1,
-    })),
-    ...COMPONENTS.map((page) => ({
-      url: root + "/docs/" + transformToSlug(page.name),
-      lastModified: new Date(),
-      priority: 0.8,
-    })),
-  ]
+  const staticRoutes = STATIC_PAGES.map((page) => ({
+    url: root + (page === "/" ? "" : page),
+    lastModified: new Date(),
+    priority: page === "/" ? 1 : 0.9,
+  }))
+
+  const docRoutes = docs.map((doc) => ({
+    url:
+      root + "/docs" + (doc.slugAsParams === "" ? "" : `/${doc.slugAsParams}`),
+    lastModified: new Date(),
+    priority: doc.slugAsParams === "" ? 1 : 0.8,
+  }))
+
+  // Combine and deduplicate by URL to ensure a clean sitemap
+  const allRoutes = [...staticRoutes, ...docRoutes]
+  const uniqueRoutes = Array.from(
+    new Map(allRoutes.map((route) => [route.url, route])).values(),
+  )
+
+  return uniqueRoutes
 }

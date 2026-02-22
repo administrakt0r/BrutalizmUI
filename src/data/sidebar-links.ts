@@ -1,6 +1,6 @@
 import { transformToSlug } from "@/lib/utils"
 
-import COMPONENTS from "./components"
+import { COMPONENTS } from "./component-list"
 
 const COMPONENTS_LINKS = COMPONENTS.map((component) => {
   return {

@@ -6,10 +6,9 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function Label({
-  className,
-  ...props
-}: React.ComponentProps<typeof LabelPrimitive.Root>) {
+interface LabelProps extends React.ComponentProps<typeof LabelPrimitive.Root> {}
+
+function Label({ className, ...props }: LabelProps) {
   return (
     <LabelPrimitive.Root
       data-slot="label"
@@ -22,4 +21,6 @@ function Label({
   )
 }
 
-export { Label }
+Label.displayName = "Label"
+
+export { Label, type LabelProps }

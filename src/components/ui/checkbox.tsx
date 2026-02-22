@@ -7,13 +7,16 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function Checkbox({
-  className,
-  ...props
-}: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
+export type CheckboxProps = React.ComponentProps<typeof CheckboxPrimitive.Root>
+
+function Checkbox({ className, id, ...props }: CheckboxProps) {
+  const generatedId = React.useId()
+  const checkboxId = id ?? generatedId
+
   return (
     <CheckboxPrimitive.Root
       data-slot="checkbox"
+      id={checkboxId}
       className={cn(
         "peer size-4 shrink-0 outline-2 outline-border ring-offset-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-main data-[state=checked]:text-white",
         className,
@@ -29,5 +32,7 @@ function Checkbox({
     </CheckboxPrimitive.Root>
   )
 }
+
+Checkbox.displayName = "Checkbox"
 
 export { Checkbox }

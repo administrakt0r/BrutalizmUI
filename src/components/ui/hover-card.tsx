@@ -6,26 +6,36 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function HoverCard({
-  ...props
-}: React.ComponentProps<typeof HoverCardPrimitive.Root>) {
+export type HoverCardProps = React.ComponentProps<typeof HoverCardPrimitive.Root>
+
+function HoverCard({ ...props }: HoverCardProps) {
   return <HoverCardPrimitive.Root data-slot="hover-card" {...props} />
 }
 
-function HoverCardTrigger({
-  ...props
-}: React.ComponentProps<typeof HoverCardPrimitive.Trigger>) {
+HoverCard.displayName = "HoverCard"
+
+export type HoverCardTriggerProps = React.ComponentProps<
+  typeof HoverCardPrimitive.Trigger
+>
+
+function HoverCardTrigger({ ...props }: HoverCardTriggerProps) {
   return (
     <HoverCardPrimitive.Trigger data-slot="hover-card-trigger" {...props} />
   )
 }
+
+HoverCardTrigger.displayName = "HoverCardTrigger"
+
+export type HoverCardContentProps = React.ComponentProps<
+  typeof HoverCardPrimitive.Content
+>
 
 function HoverCardContent({
   className,
   align = "center",
   sideOffset = 4,
   ...props
-}: React.ComponentProps<typeof HoverCardPrimitive.Content>) {
+}: HoverCardContentProps) {
   return (
     <HoverCardPrimitive.Content
       data-slot="hover-card-content"
@@ -39,5 +49,7 @@ function HoverCardContent({
     />
   )
 }
+
+HoverCardContent.displayName = "HoverCardContent"
 
 export { HoverCard, HoverCardTrigger, HoverCardContent }

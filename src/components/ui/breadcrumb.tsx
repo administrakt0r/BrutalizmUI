@@ -9,6 +9,8 @@ function Breadcrumb({ ...props }: React.ComponentProps<"nav">) {
   return <nav data-slot="breadcrumb" aria-label="breadcrumb" {...props} />
 }
 
+Breadcrumb.displayName = "Breadcrumb"
+
 function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
   return (
     <ol
@@ -22,6 +24,8 @@ function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
   )
 }
 
+BreadcrumbList.displayName = "BreadcrumbList"
+
 function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
   return (
     <li
@@ -31,6 +35,8 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
     />
   )
 }
+
+BreadcrumbItem.displayName = "BreadcrumbItem"
 
 function BreadcrumbLink({
   asChild,
@@ -46,6 +52,8 @@ function BreadcrumbLink({
   )
 }
 
+BreadcrumbLink.displayName = "BreadcrumbLink"
+
 function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
   return (
     <span
@@ -58,6 +66,8 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
     />
   )
 }
+
+BreadcrumbPage.displayName = "BreadcrumbPage"
 
 function BreadcrumbSeparator({
   children,
@@ -77,6 +87,8 @@ function BreadcrumbSeparator({
   )
 }
 
+BreadcrumbSeparator.displayName = "BreadcrumbSeparator"
+
 function BreadcrumbEllipsis({
   className,
   ...props
@@ -94,6 +106,8 @@ function BreadcrumbEllipsis({
     </span>
   )
 }
+
+BreadcrumbEllipsis.displayName = "BreadcrumbEllipsis"
 
 export {
   Breadcrumb,

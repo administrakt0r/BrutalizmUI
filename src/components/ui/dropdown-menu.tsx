@@ -12,6 +12,7 @@ function DropdownMenu({
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {
   return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" {...props} />
 }
+DropdownMenu.displayName = "DropdownMenu"
 
 function DropdownMenuTrigger({
   ...props
@@ -23,30 +24,35 @@ function DropdownMenuTrigger({
     />
   )
 }
+DropdownMenuTrigger.displayName = "DropdownMenuTrigger"
 
 function DropdownMenuGroup({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Group>) {
   return <DropdownMenuPrimitive.Group {...props} />
 }
+DropdownMenuGroup.displayName = "DropdownMenuGroup"
 
 function DropdownMenuPortal({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Portal>) {
   return <DropdownMenuPrimitive.Portal {...props} />
 }
+DropdownMenuPortal.displayName = "DropdownMenuPortal"
 
 function DropdownMenuSub({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Sub>) {
   return <DropdownMenuPrimitive.Sub {...props} />
 }
+DropdownMenuSub.displayName = "DropdownMenuSub"
 
 function DropdownMenuRadioGroup({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.RadioGroup>) {
   return <DropdownMenuPrimitive.RadioGroup {...props} />
 }
+DropdownMenuRadioGroup.displayName = "DropdownMenuRadioGroup"
 
 function DropdownMenuSubTrigger({
   className,
@@ -71,6 +77,7 @@ function DropdownMenuSubTrigger({
     </DropdownMenuPrimitive.SubTrigger>
   )
 }
+DropdownMenuSubTrigger.displayName = "DropdownMenuSubTrigger"
 
 function DropdownMenuSubContent({
   className,
@@ -86,6 +93,7 @@ function DropdownMenuSubContent({
     />
   )
 }
+DropdownMenuSubContent.displayName = "DropdownMenuSubContent"
 
 function DropdownMenuContent({
   className,
@@ -106,6 +114,7 @@ function DropdownMenuContent({
     </DropdownMenuPrimitive.Portal>
   )
 }
+DropdownMenuContent.displayName = "DropdownMenuContent"
 
 function DropdownMenuItem({
   className,
@@ -126,6 +135,7 @@ function DropdownMenuItem({
     />
   )
 }
+DropdownMenuItem.displayName = "DropdownMenuItem"
 
 function DropdownMenuCheckboxItem({
   className,
@@ -151,6 +161,7 @@ function DropdownMenuCheckboxItem({
     </DropdownMenuPrimitive.CheckboxItem>
   )
 }
+DropdownMenuCheckboxItem.displayName = "DropdownMenuCheckboxItem"
 
 function DropdownMenuRadioItem({
   className,
@@ -174,6 +185,7 @@ function DropdownMenuRadioItem({
     </DropdownMenuPrimitive.RadioItem>
   )
 }
+DropdownMenuRadioItem.displayName = "DropdownMenuRadioItem"
 
 function DropdownMenuLabel({
   className,
@@ -194,6 +206,7 @@ function DropdownMenuLabel({
     />
   )
 }
+DropdownMenuLabel.displayName = "DropdownMenuLabel"
 
 function DropdownMenuSeparator({
   className,
@@ -206,6 +219,7 @@ function DropdownMenuSeparator({
     />
   )
 }
+DropdownMenuSeparator.displayName = "DropdownMenuSeparator"
 
 function DropdownMenuShortcut({
   className,
@@ -219,6 +233,7 @@ function DropdownMenuShortcut({
     />
   )
 }
+DropdownMenuShortcut.displayName = "DropdownMenuShortcut"
 
 export {
   DropdownMenu,

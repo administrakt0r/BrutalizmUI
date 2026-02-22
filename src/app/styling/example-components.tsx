@@ -1,5 +1,6 @@
 import AlertDemo from "@/examples/ui/alert"
 
+import { LazyRender } from "@/components/app/lazy-render"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -28,20 +29,36 @@ export default function ExampleComponents() {
       <div className="flex flex-col gap-5">
         <CollapsibleDemo />
         <AccordionDemo />
-        <CarouselDemo />
+        <LazyRender className="min-h-[200px]">
+          <CarouselDemo />
+        </LazyRender>
         <AlertDemo />
-        <CardDemo2 />
+        <LazyRender className="min-h-[350px]">
+          <CardDemo2 />
+        </LazyRender>
       </div>
       <div className="lg:flex hidden flex-col gap-5">
-        <ScrollAreaDemo />
+        <LazyRender className="min-h-[300px]">
+          <ScrollAreaDemo />
+        </LazyRender>
         <AlertDemo />
-        <CardDemo3 />
-        <ImageCardDemo />
+        <LazyRender className="min-h-[350px]">
+          <CardDemo3 />
+        </LazyRender>
+        <LazyRender className="min-h-[300px]">
+          <ImageCardDemo />
+        </LazyRender>
       </div>
       <div className="sm:flex hidden flex-col gap-5">
-        <ResizableDemo />
-        <CommandDemo />
-        <CardDemo />
+        <LazyRender className="min-h-[200px]">
+          <ResizableDemo />
+        </LazyRender>
+        <LazyRender className="min-h-[565px]">
+          <CommandDemo />
+        </LazyRender>
+        <LazyRender className="min-h-[350px]">
+          <CardDemo />
+        </LazyRender>
       </div>
     </div>
   )

@@ -7,16 +7,21 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function Accordion({
-  ...props
-}: React.ComponentProps<typeof AccordionPrimitive.Root>) {
+export type AccordionProps = React.ComponentProps<
+  typeof AccordionPrimitive.Root
+>
+
+function Accordion({ ...props }: AccordionProps) {
   return <AccordionPrimitive.Root data-slot="accordion" {...props} />
 }
 
-function AccordionItem({
-  className,
-  ...props
-}: React.ComponentProps<typeof AccordionPrimitive.Item>) {
+Accordion.displayName = "Accordion"
+
+export type AccordionItemProps = React.ComponentProps<
+  typeof AccordionPrimitive.Item
+>
+
+function AccordionItem({ className, ...props }: AccordionItemProps) {
   return (
     <AccordionPrimitive.Item
       data-slot="accordion-item"
@@ -29,11 +34,17 @@ function AccordionItem({
   )
 }
 
+AccordionItem.displayName = "AccordionItem"
+
+export type AccordionTriggerProps = React.ComponentProps<
+  typeof AccordionPrimitive.Trigger
+>
+
 function AccordionTrigger({
   className,
   children,
   ...props
-}: React.ComponentProps<typeof AccordionPrimitive.Trigger>) {
+}: AccordionTriggerProps) {
   return (
     <AccordionPrimitive.Header className="flex">
       <AccordionPrimitive.Trigger
@@ -45,17 +56,26 @@ function AccordionTrigger({
         {...props}
       >
         {children}
-        <ChevronDown className="pointer-events-none size-5 shrink-0 transition-transform duration-200" />
+        <ChevronDown
+          className="pointer-events-none size-5 shrink-0 transition-transform duration-200"
+          aria-hidden="true"
+        />
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
   )
 }
 
+AccordionTrigger.displayName = "AccordionTrigger"
+
+export type AccordionContentProps = React.ComponentProps<
+  typeof AccordionPrimitive.Content
+>
+
 function AccordionContent({
   className,
   children,
   ...props
-}: React.ComponentProps<typeof AccordionPrimitive.Content>) {
+}: AccordionContentProps) {
   return (
     <AccordionPrimitive.Content
       data-slot="accordion-content"

@@ -17,6 +17,7 @@ function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
     />
   )
 }
+Pagination.displayName = "Pagination"
 
 function PaginationContent({
   className,
@@ -30,12 +31,14 @@ function PaginationContent({
     />
   )
 }
+PaginationContent.displayName = "PaginationContent"
 
 function PaginationItem({ className, ...props }: React.ComponentProps<"li">) {
   return (
     <li data-slot="pagination-item" className={cn("", className)} {...props} />
   )
 }
+PaginationItem.displayName = "PaginationItem"
 
 function PaginationLink({
   className,
@@ -62,6 +65,7 @@ function PaginationLink({
     />
   )
 }
+PaginationLink.displayName = "PaginationLink"
 
 function PaginationPrevious({
   className,
@@ -75,11 +79,12 @@ function PaginationPrevious({
       className={cn("gap-1 pl-2.5", className)}
       {...props}
     >
-      <ChevronLeft className="size-4" />
+      <ChevronLeft className="size-4" aria-hidden="true" />
       <span>Previous</span>
     </PaginationLink>
   )
 }
+PaginationPrevious.displayName = "PaginationPrevious"
 
 function PaginationNext({
   className,
@@ -94,10 +99,11 @@ function PaginationNext({
       {...props}
     >
       <span>Next</span>
-      <ChevronRight className="size-4" />
+      <ChevronRight className="size-4" aria-hidden="true" />
     </PaginationLink>
   )
 }
+PaginationNext.displayName = "PaginationNext"
 
 function PaginationEllipsis({
   className,
@@ -106,15 +112,15 @@ function PaginationEllipsis({
   return (
     <span
       data-slot="pagination-ellipsis"
-      aria-hidden
       className={cn("flex size-9 items-center justify-center", className)}
       {...props}
     >
-      <MoreHorizontal className="size-4" />
+      <MoreHorizontal className="size-4" aria-hidden="true" />
       <span className="sr-only">More pages</span>
     </span>
   )
 }
+PaginationEllipsis.displayName = "PaginationEllipsis"
 
 export {
   Pagination,

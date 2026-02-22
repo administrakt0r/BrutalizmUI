@@ -1,93 +1,153 @@
-import AccordionDemo from "@/examples/ui/accordion"
-import AlertDemo from "@/examples/ui/alert"
-import AlertDialogDemo from "@/examples/ui/alert-dialog"
-import AlertDescriptionOnlyDemo from "@/examples/ui/alert/description-only"
-import AlertDestructiveDemo from "@/examples/ui/alert/destructive"
-import AlertIconDescriptionDemo from "@/examples/ui/alert/icon-description"
-import AlertIconTitleDemo from "@/examples/ui/alert/icon-title"
-import AlertLongDescriptionDemo from "@/examples/ui/alert/long-description"
-import AlertLongTitleDemo from "@/examples/ui/alert/long-title"
-import AlertLongTitleAndDescriptionDemo from "@/examples/ui/alert/long-title-and-description"
-import AlertWithButtonDemo from "@/examples/ui/alert/with-button"
-import AvatarDemo from "@/examples/ui/avatar"
-import AvatarFallbackDemo from "@/examples/ui/avatar/fallback"
-import BadgeDemo from "@/examples/ui/badge"
-import BadgeNeutralDemo from "@/examples/ui/badge/neutral"
-import BadgeWithIconDemo from "@/examples/ui/badge/with-icon"
-import BreadcrumbDemo from "@/examples/ui/breadcrumb"
-import ButtonDemo from "@/examples/ui/button"
-import ButtonIconDemo from "@/examples/ui/button/icon"
-import ButtonNeutralDemo from "@/examples/ui/button/neutral"
-import ButtonNoShadowDemo from "@/examples/ui/button/no-shadow"
-import ButtonReverseDemo from "@/examples/ui/button/reverse"
-import ButtonWithIconDemo from "@/examples/ui/button/with-icon"
-import CalendarDemo from "@/examples/ui/calendar/index"
-import CalendarRangeDemo from "@/examples/ui/calendar/range"
-import CardDemo from "@/examples/ui/card"
-import CarouselDemo from "@/examples/ui/carousel"
-import ChartDemo from "@/examples/ui/chart/chart-area-stacked"
-import CheckboxDemo from "@/examples/ui/checkbox"
-import CollapsibleDemo from "@/examples/ui/collapsible"
-import ComboboxDemo from "@/examples/ui/combobox"
-import ComboboxMultiselectDemo from "@/examples/ui/combobox/multiselect"
-import ComboboxTimezonesDemo from "@/examples/ui/combobox/timezones"
-import ComboboxUsersDemo from "@/examples/ui/combobox/users"
-import CommandDemo from "@/examples/ui/command"
-import ContextMenuDemo from "@/examples/ui/context-menu"
-import DataTableDemo from "@/examples/ui/data-table"
-import DatePickerDemo from "@/examples/ui/date-picker"
-import DialogDemo from "@/examples/ui/dialog"
-import DialogWithScrollableContent from "@/examples/ui/dialog/scrollable-content"
-import DialogWithStickyFooter from "@/examples/ui/dialog/sticky-footer"
-import DrawerDemo from "@/examples/ui/drawer"
-import DrawerWithScrollableContent from "@/examples/ui/drawer/scrollable-content"
-import DropdownMenuDemo from "@/examples/ui/dropdown-menu"
-import DropdownMenuCheckboxes from "@/examples/ui/dropdown-menu/checkboxes"
-import DropdownMenuRadioGroupDemo from "@/examples/ui/dropdown-menu/radio"
-import FormDemo from "@/examples/ui/form"
-import HoverCardDemo from "@/examples/ui/hover-card"
-import ImageCardDemo from "@/examples/ui/image-card"
-import InputDemo from "@/examples/ui/input"
-import InputOTPDemo from "@/examples/ui/input-otp"
-import InputDisabledDemo from "@/examples/ui/input/disabled"
-import InputFileDemo from "@/examples/ui/input/file"
-import InputWithButtonDemo from "@/examples/ui/input/with-button"
-import InputWithLabelDemo from "@/examples/ui/input/with-label"
-import LabelDemo from "@/examples/ui/label"
-import MarqueeDemo from "@/examples/ui/marquee"
-import MenubarDemo from "@/examples/ui/menubar"
-import NavigationMenuDemo from "@/examples/ui/navigation-menu"
-import PaginationDemo from "@/examples/ui/pagination"
-import PopoverDemo from "@/examples/ui/popover"
-import ProgressDemo from "@/examples/ui/progress"
-import RadioGroupDemo from "@/examples/ui/radio-group"
-import ResizableDemo from "@/examples/ui/resizable"
-import ScrollAreaDemo from "@/examples/ui/scroll-area"
-import SelectDemo from "@/examples/ui/select"
-import SelectDisabledDemo from "@/examples/ui/select/disabled"
-import SelectLargeListDemo from "@/examples/ui/select/large-list"
-import SelectWithIconDemo from "@/examples/ui/select/with-icon"
-import SheetDemo from "@/examples/ui/sheet"
-import SheetSideDemo from "@/examples/ui/sheet/side"
-import SidebarDemo from "@/examples/ui/sidebar/page"
-import SkeletonDemo from "@/examples/ui/skeleton"
-import SliderDemo from "@/examples/ui/slider"
-import SliderControlled from "@/examples/ui/slider/controlled"
-import TwoThumbsSliderDemo from "@/examples/ui/slider/two-thumbs"
-import VerticalSliderDemo from "@/examples/ui/slider/vertical"
-import SonnerDemo from "@/examples/ui/sonner"
-import SonnerActionDemo from "@/examples/ui/sonner/action"
-import SonnerCancelDemo from "@/examples/ui/sonner/cancel"
-import SonnerErrorDemo from "@/examples/ui/sonner/error"
-import SonnerInfoDemo from "@/examples/ui/sonner/info"
-import SonnerPromiseDemo from "@/examples/ui/sonner/promise"
-import SonnerSuccessDemo from "@/examples/ui/sonner/success"
-import SonnerWarningDemo from "@/examples/ui/sonner/warning"
-import SwitchDemo from "@/examples/ui/switch"
-import TableDemo from "@/examples/ui/table"
-import TabsDemo from "@/examples/ui/tabs"
-import TextareaDemo from "@/examples/ui/textarea"
-import TooltipDemo from "@/examples/ui/tooltip"
+import dynamic from "next/dynamic"
+
+import { transformToSlug } from "@/lib/utils"
+
+const AccordionDemo = dynamic(() => import("@/examples/ui/accordion"))
+const AlertDemo = dynamic(() => import("@/examples/ui/alert"))
+const AlertDialogDemo = dynamic(() => import("@/examples/ui/alert-dialog"))
+const AlertDescriptionOnlyDemo = dynamic(
+  () => import("@/examples/ui/alert/description-only"),
+)
+const AlertDestructiveDemo = dynamic(
+  () => import("@/examples/ui/alert/destructive"),
+)
+const AlertIconDescriptionDemo = dynamic(
+  () => import("@/examples/ui/alert/icon-description"),
+)
+const AlertIconTitleDemo = dynamic(
+  () => import("@/examples/ui/alert/icon-title"),
+)
+const AlertLongDescriptionDemo = dynamic(
+  () => import("@/examples/ui/alert/long-description"),
+)
+const AlertLongTitleDemo = dynamic(
+  () => import("@/examples/ui/alert/long-title"),
+)
+const AlertLongTitleAndDescriptionDemo = dynamic(
+  () => import("@/examples/ui/alert/long-title-and-description"),
+)
+const AlertWithButtonDemo = dynamic(
+  () => import("@/examples/ui/alert/with-button"),
+)
+const AvatarDemo = dynamic(() => import("@/examples/ui/avatar"))
+const AvatarFallbackDemo = dynamic(
+  () => import("@/examples/ui/avatar/fallback"),
+)
+const BadgeDemo = dynamic(() => import("@/examples/ui/badge"))
+const BadgeNeutralDemo = dynamic(() => import("@/examples/ui/badge/neutral"))
+const BadgeWithIconDemo = dynamic(() => import("@/examples/ui/badge/with-icon"))
+const BreadcrumbDemo = dynamic(() => import("@/examples/ui/breadcrumb"))
+const ButtonDemo = dynamic(() => import("@/examples/ui/button"))
+const ButtonIconDemo = dynamic(() => import("@/examples/ui/button/icon"))
+const ButtonNeutralDemo = dynamic(() => import("@/examples/ui/button/neutral"))
+const ButtonNoShadowDemo = dynamic(
+  () => import("@/examples/ui/button/no-shadow"),
+)
+const ButtonReverseDemo = dynamic(() => import("@/examples/ui/button/reverse"))
+const ButtonWithIconDemo = dynamic(
+  () => import("@/examples/ui/button/with-icon"),
+)
+const CalendarDemo = dynamic(() => import("@/examples/ui/calendar/index"))
+const CalendarRangeDemo = dynamic(() => import("@/examples/ui/calendar/range"))
+const CardDemo = dynamic(() => import("@/examples/ui/card"))
+const CarouselDemo = dynamic(() => import("@/examples/ui/carousel"))
+const ChartDemo = dynamic(
+  () => import("@/examples/ui/chart/chart-area-stacked"),
+)
+const CheckboxDemo = dynamic(() => import("@/examples/ui/checkbox"))
+const CollapsibleDemo = dynamic(() => import("@/examples/ui/collapsible"))
+const ComboboxDemo = dynamic(() => import("@/examples/ui/combobox"))
+const ComboboxMultiselectDemo = dynamic(
+  () => import("@/examples/ui/combobox/multiselect"),
+)
+const ComboboxTimezonesDemo = dynamic(
+  () => import("@/examples/ui/combobox/timezones"),
+)
+const ComboboxUsersDemo = dynamic(() => import("@/examples/ui/combobox/users"))
+const CommandDemo = dynamic(() => import("@/examples/ui/command"))
+const ContextMenuDemo = dynamic(() => import("@/examples/ui/context-menu"))
+const DataTableDemo = dynamic(() => import("@/examples/ui/data-table"))
+const DatePickerDemo = dynamic(() => import("@/examples/ui/date-picker"))
+const DialogDemo = dynamic(() => import("@/examples/ui/dialog"))
+const DialogWithScrollableContent = dynamic(
+  () => import("@/examples/ui/dialog/scrollable-content"),
+)
+const DialogWithStickyFooter = dynamic(
+  () => import("@/examples/ui/dialog/sticky-footer"),
+)
+const DrawerDemo = dynamic(() => import("@/examples/ui/drawer"))
+const DrawerWithScrollableContent = dynamic(
+  () => import("@/examples/ui/drawer/scrollable-content"),
+)
+const DropdownMenuDemo = dynamic(() => import("@/examples/ui/dropdown-menu"))
+const DropdownMenuCheckboxes = dynamic(
+  () => import("@/examples/ui/dropdown-menu/checkboxes"),
+)
+const DropdownMenuRadioGroupDemo = dynamic(
+  () => import("@/examples/ui/dropdown-menu/radio"),
+)
+const FormDemo = dynamic(() => import("@/examples/ui/form"))
+const HoverCardDemo = dynamic(() => import("@/examples/ui/hover-card"))
+const ImageCardDemo = dynamic(() => import("@/examples/ui/image-card"))
+const InputDemo = dynamic(() => import("@/examples/ui/input"))
+const InputOTPDemo = dynamic(() => import("@/examples/ui/input-otp"))
+const InputDisabledDemo = dynamic(() => import("@/examples/ui/input/disabled"))
+const InputFileDemo = dynamic(() => import("@/examples/ui/input/file"))
+const InputWithButtonDemo = dynamic(
+  () => import("@/examples/ui/input/with-button"),
+)
+const InputWithLabelDemo = dynamic(
+  () => import("@/examples/ui/input/with-label"),
+)
+const LabelDemo = dynamic(() => import("@/examples/ui/label"))
+const MarqueeDemo = dynamic(() => import("@/examples/ui/marquee"))
+const MenubarDemo = dynamic(() => import("@/examples/ui/menubar"))
+const NavigationMenuDemo = dynamic(
+  () => import("@/examples/ui/navigation-menu"),
+)
+const PaginationDemo = dynamic(() => import("@/examples/ui/pagination"))
+const PopoverDemo = dynamic(() => import("@/examples/ui/popover"))
+const ProgressDemo = dynamic(() => import("@/examples/ui/progress"))
+const RadioGroupDemo = dynamic(() => import("@/examples/ui/radio-group"))
+const ResizableDemo = dynamic(() => import("@/examples/ui/resizable"))
+const ScrollAreaDemo = dynamic(() => import("@/examples/ui/scroll-area"))
+const SelectDemo = dynamic(() => import("@/examples/ui/select"))
+const SelectDisabledDemo = dynamic(
+  () => import("@/examples/ui/select/disabled"),
+)
+const SelectLargeListDemo = dynamic(
+  () => import("@/examples/ui/select/large-list"),
+)
+const SelectWithIconDemo = dynamic(
+  () => import("@/examples/ui/select/with-icon"),
+)
+const SheetDemo = dynamic(() => import("@/examples/ui/sheet"))
+const SheetSideDemo = dynamic(() => import("@/examples/ui/sheet/side"))
+const SidebarDemo = dynamic(() => import("@/examples/ui/sidebar/page"))
+const SkeletonDemo = dynamic(() => import("@/examples/ui/skeleton"))
+const SliderDemo = dynamic(() => import("@/examples/ui/slider"))
+const SliderControlled = dynamic(
+  () => import("@/examples/ui/slider/controlled"),
+)
+const TwoThumbsSliderDemo = dynamic(
+  () => import("@/examples/ui/slider/two-thumbs"),
+)
+const VerticalSliderDemo = dynamic(
+  () => import("@/examples/ui/slider/vertical"),
+)
+const SonnerDemo = dynamic(() => import("@/examples/ui/sonner"))
+const SonnerActionDemo = dynamic(() => import("@/examples/ui/sonner/action"))
+const SonnerCancelDemo = dynamic(() => import("@/examples/ui/sonner/cancel"))
+const SonnerErrorDemo = dynamic(() => import("@/examples/ui/sonner/error"))
+const SonnerInfoDemo = dynamic(() => import("@/examples/ui/sonner/info"))
+const SonnerPromiseDemo = dynamic(() => import("@/examples/ui/sonner/promise"))
+const SonnerSuccessDemo = dynamic(() => import("@/examples/ui/sonner/success"))
+const SonnerWarningDemo = dynamic(() => import("@/examples/ui/sonner/warning"))
+const SwitchDemo = dynamic(() => import("@/examples/ui/switch"))
+const TableDemo = dynamic(() => import("@/examples/ui/table"))
+const TabsDemo = dynamic(() => import("@/examples/ui/tabs"))
+const TextareaDemo = dynamic(() => import("@/examples/ui/textarea"))
+const TooltipDemo = dynamic(() => import("@/examples/ui/tooltip"))
 
 type Component = {
   name: string
@@ -373,5 +433,13 @@ const COMPONENTS: Component[] = [
     exampleComponent: TooltipDemo,
   },
 ]
+
+export const COMPONENTS_MAP = COMPONENTS.reduce(
+  (acc, component) => {
+    acc[transformToSlug(component.name)] = component
+    return acc
+  },
+  {} as Record<string, Component>,
+)
 
 export default COMPONENTS

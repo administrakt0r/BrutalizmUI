@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { memo, useCallback, useState } from "react"
 
 import STARS from "@/data/stars"
 
@@ -13,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { TooltipProvider } from "@/components/ui/tooltip"
 
 import CopyBtn from "./copy-btn"
 import ShadcnBtn from "./shadcn-btn"
@@ -23,7 +22,7 @@ export default function StarsGrid() {
     "pnpm dlx shadcn@latest add https://brutalizmui.pages.dev/r/",
   )
 
-  const handleChange = (pkg: string) => {
+  const handleChange = useCallback((pkg: string) => {
     const command = "shadcn@latest add https://brutalizmui.pages.dev/r/"
 
     if (pkg === "pnpm") {
@@ -31,11 +30,11 @@ export default function StarsGrid() {
     } else if (pkg === "npm") {
       setCommand("npx " + command)
     } else if (pkg === "yarn") {
-      setCommand("npx " + command)
+      setCommand("yarn dlx " + command)
     } else {
       setCommand("bunx --bun " + command)
     }
-  }
+  }, [])
 
   return (
     <>
@@ -56,30 +55,48 @@ export default function StarsGrid() {
         </Select>
       </div>
 
-      {/* One provider for all cards avoids creating 40 duplicate tooltip contexts. */}
-      <TooltipProvider delayDuration={0}>
-        <div className="grid gap-5 xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 xl:gap-[50px]">
-          {STARS.map((star, i) => {
-            return (
-              <div
-                className="flex items-center gap-4 p-5 justify-center flex-col border-2 border-border bg-secondary-background rounded-base shadow-shadow"
-                key={i}
-              >
-                <div className="xl:size-[200px] md:size-[160px] size-[120px]">
-                  <star.componentExample />
-                </div>
-
-                <h4 className="font-heading">Star {i + 1}</h4>
-
-                <div className="flex items-center gap-2">
-                  <ShadcnBtn command={command + `s${i + 1}.json`} />
-                  <CopyBtn code={star.code} />
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </TooltipProvider>
+      {/* ⚡ Bolt: Removed redundant TooltipProvider as it is already provided in the root layout. */}
+      <div className="grid gap-5 xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 xl:gap-[50px]">
+        {STARS.map((star, i) => {
+          return (
+            <StarCard
+              key={star.id}
+              star={star}
+              index={i}
+              command={command + `s${i + 1}.json`}
+            />
+          )
+        })}
+      </div>
     </>
   )
 }
+
+const StarCard = memo(
+  ({
+    star,
+    index,
+    command,
+  }: {
+    star: (typeof STARS)[0]
+    index: number
+    command: string
+  }) => {
+    return (
+      <div className="flex items-center gap-4 p-5 justify-center flex-col border-2 border-border bg-secondary-background rounded-base shadow-shadow">
+        <div className="xl:size-[200px] md:size-[160px] size-[120px]">
+          <star.componentExample />
+        </div>
+
+        <h4 className="font-heading">Star {index + 1}</h4>
+
+        <div className="flex items-center gap-2">
+          <ShadcnBtn command={command} />
+          <CopyBtn id={star.id} />
+        </div>
+      </div>
+    )
+  },
+)
+
+StarCard.displayName = "StarCard"

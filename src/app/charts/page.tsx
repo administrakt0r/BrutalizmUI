@@ -14,6 +14,9 @@ export const metadata: Metadata = {
   title: "Charts",
   description:
     "Beautiful charts. Built using Recharts. Copy and paste into your apps.",
+  alternates: {
+    canonical: "/charts",
+  },
 }
 
 export default function Page() {

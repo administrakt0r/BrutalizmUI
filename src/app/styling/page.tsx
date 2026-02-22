@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 
+import { ErrorBoundary } from "@/components/app/error-boundary"
 import {
   PageDescription,
   PageHeader,
@@ -13,6 +14,9 @@ import Styling from "./styling"
 export const metadata: Metadata = {
   title: "Styling",
   description: "Learn how to fully customize your neobrutalism layouts.",
+  alternates: {
+    canonical: "/styling",
+  },
 }
 
 export default function Page() {
@@ -26,9 +30,13 @@ export default function Page() {
           to your project.
         </PageDescription>
 
-        <Styling />
+        <ErrorBoundary>
+          <Styling />
+        </ErrorBoundary>
 
-        <ExampleComponents />
+        <ErrorBoundary>
+          <ExampleComponents />
+        </ErrorBoundary>
       </PageHeader>
     </PageWrapper>
   )

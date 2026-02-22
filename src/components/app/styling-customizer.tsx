@@ -2,7 +2,7 @@
 
 import { CheckCircle2Icon } from "lucide-react"
 
-import { useState } from "react"
+import * as React from "react"
 
 import {
   Accordion,
@@ -74,23 +74,48 @@ const previewStyling = [
   },
 ]
 
+type StylingItem = (typeof previewStyling)[number]
+
+const StylingButton = React.memo(
+  ({
+    color,
+    onClick,
+  }: {
+    color: StylingItem
+    onClick: (item: StylingItem) => void
+  }) => {
+    return (
+      <Button
+        className={`h-full border-2 border-border md:text-xl sm:text-sm text-xs sm:px-4 px-2 ${color.main}`}
+        onClick={() => onClick(color)}
+      >
+        try {color.name}
+      </Button>
+    )
+  },
+)
+
+StylingButton.displayName = "StylingButton"
+
 export default function StylingCustomizer() {
-  const [{ main, bg, rounded, boxShadow }, setStyling] = useState(
+  const [{ main, bg, rounded, boxShadow }, setStyling] = React.useState(
     previewStyling[0],
   )
+
+  const handleSetStyling = React.useCallback((styling: StylingItem) => {
+    setStyling(styling)
+  }, [])
 
   return (
     <div className="mx-auto max-w-[800px] w-full mt-20 sm:px-5 px-0">
       <div className="grid md:gap-10 gap-5">
         <div className="grid md:grid-cols-4 sm:grid-cols-2 grid-cols-2 gap-4 sm:w-full w-2/3 mx-auto">
           {previewStyling.map((color) => (
-            <Button
+            <StylingButton
               key={color.name}
-              className={`h-full border-2 border-border md:text-xl sm:text-sm text-xs sm:px-4 px-2 ${color.main}`}
-              onClick={() => setStyling(color)}
-            >
-              try {color.name}
-            </Button>
+              color={color}
+              onClick={handleSetStyling}
+            />
           ))}
         </div>
         <div

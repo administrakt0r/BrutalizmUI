@@ -56,5 +56,6 @@ function Slider({
     </SliderPrimitive.Root>
   )
 }
+Slider.displayName = "Slider"
 
 export { Slider }

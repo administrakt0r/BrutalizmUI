@@ -8,14 +8,18 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+export type NavigationMenuProps = React.ComponentProps<
+  typeof NavigationMenuPrimitive.Root
+> & {
+  viewport?: boolean
+}
+
 function NavigationMenu({
   className,
   children,
   viewport = true,
   ...props
-}: React.ComponentProps<typeof NavigationMenuPrimitive.Root> & {
-  viewport?: boolean
-}) {
+}: NavigationMenuProps) {
   return (
     <NavigationMenuPrimitive.Root
       data-slot="navigation-menu"
@@ -31,11 +35,16 @@ function NavigationMenu({
     </NavigationMenuPrimitive.Root>
   )
 }
+NavigationMenu.displayName = "NavigationMenu"
+
+export type NavigationMenuListProps = React.ComponentProps<
+  typeof NavigationMenuPrimitive.List
+>
 
 function NavigationMenuList({
   className,
   ...props
-}: React.ComponentProps<typeof NavigationMenuPrimitive.List>) {
+}: NavigationMenuListProps) {
   return (
     <NavigationMenuPrimitive.List
       data-slot="navigation-menu-list"
@@ -47,11 +56,16 @@ function NavigationMenuList({
     />
   )
 }
+NavigationMenuList.displayName = "NavigationMenuList"
+
+export type NavigationMenuItemProps = React.ComponentProps<
+  typeof NavigationMenuPrimitive.Item
+>
 
 function NavigationMenuItem({
   className,
   ...props
-}: React.ComponentProps<typeof NavigationMenuPrimitive.Item>) {
+}: NavigationMenuItemProps) {
   return (
     <NavigationMenuPrimitive.Item
       data-slot="navigation-menu-item"
@@ -60,16 +74,21 @@ function NavigationMenuItem({
     />
   )
 }
+NavigationMenuItem.displayName = "NavigationMenuItem"
 
 const navigationMenuTriggerStyle = cva(
   "group inline-flex h-10 w-max items-center justify-center text-main-foreground rounded-base bg-main px-4 py-2 text-sm font-heading transition-colors focus:outline-none disabled:pointer-events-none disabled:opacity-50",
 )
 
+export type NavigationMenuTriggerProps = React.ComponentProps<
+  typeof NavigationMenuPrimitive.Trigger
+>
+
 function NavigationMenuTrigger({
   className,
   children,
   ...props
-}: React.ComponentProps<typeof NavigationMenuPrimitive.Trigger>) {
+}: NavigationMenuTriggerProps) {
   return (
     <NavigationMenuPrimitive.Trigger
       data-slot="navigation-menu-trigger"
@@ -84,11 +103,16 @@ function NavigationMenuTrigger({
     </NavigationMenuPrimitive.Trigger>
   )
 }
+NavigationMenuTrigger.displayName = "NavigationMenuTrigger"
+
+export type NavigationMenuContentProps = React.ComponentProps<
+  typeof NavigationMenuPrimitive.Content
+>
 
 function NavigationMenuContent({
   className,
   ...props
-}: React.ComponentProps<typeof NavigationMenuPrimitive.Content>) {
+}: NavigationMenuContentProps) {
   return (
     <NavigationMenuPrimitive.Content
       data-slot="navigation-menu-content"
@@ -101,11 +125,16 @@ function NavigationMenuContent({
     />
   )
 }
+NavigationMenuContent.displayName = "NavigationMenuContent"
+
+export type NavigationMenuLinkProps = React.ComponentProps<
+  typeof NavigationMenuPrimitive.Link
+>
 
 function NavigationMenuLink({
   className,
   ...props
-}: React.ComponentProps<typeof NavigationMenuPrimitive.Link>) {
+}: NavigationMenuLinkProps) {
   return (
     <NavigationMenuPrimitive.Link
       data-slot="navigation-menu-link"
@@ -117,11 +146,16 @@ function NavigationMenuLink({
     />
   )
 }
+NavigationMenuLink.displayName = "NavigationMenuLink"
+
+export type NavigationMenuViewportProps = React.ComponentProps<
+  typeof NavigationMenuPrimitive.Viewport
+>
 
 function NavigationMenuViewport({
   className,
   ...props
-}: React.ComponentProps<typeof NavigationMenuPrimitive.Viewport>) {
+}: NavigationMenuViewportProps) {
   return (
     <div
       className={cn(
@@ -139,11 +173,16 @@ function NavigationMenuViewport({
     </div>
   )
 }
+NavigationMenuViewport.displayName = "NavigationMenuViewport"
+
+export type NavigationMenuIndicatorProps = React.ComponentProps<
+  typeof NavigationMenuPrimitive.Indicator
+>
 
 function NavigationMenuIndicator({
   className,
   ...props
-}: React.ComponentProps<typeof NavigationMenuPrimitive.Indicator>) {
+}: NavigationMenuIndicatorProps) {
   return (
     <NavigationMenuPrimitive.Indicator
       data-slot="navigation-menu-indicator"
@@ -157,6 +196,7 @@ function NavigationMenuIndicator({
     </NavigationMenuPrimitive.Indicator>
   )
 }
+NavigationMenuIndicator.displayName = "NavigationMenuIndicator"
 
 export {
   navigationMenuTriggerStyle,

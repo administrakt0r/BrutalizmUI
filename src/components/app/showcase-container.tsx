@@ -2,6 +2,8 @@ import clsx from "clsx"
 
 import Image, { StaticImageData } from "next/image"
 
+import { isSafeUrl, sanitizeColor } from "@/lib/security"
+
 export default function ShowcaseContainer({
   items,
 }: {
@@ -31,6 +33,7 @@ export default function ShowcaseContainer({
                   alt={`${title} preview`}
                   sizes="(min-width: 640px) 50vw, 100vw"
                   priority={index < 2}
+                  placeholder="blur"
                 />
               </div>
 
@@ -39,8 +42,8 @@ export default function ShowcaseContainer({
               <div className="grid grid-cols-2 md:text-base text-sm gap-5 mt-8">
                 <a
                   style={{
-                    backgroundColor: `${color}`,
-                    color: text ? `${text}` : "black",
+                    backgroundColor: sanitizeColor(color),
+                    color: text ? sanitizeColor(text) : "black",
                   }}
                   className={clsx(
                     "text-center border-2 py-1.5 font-base shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none dark:hover:shadow-none transition-all border-border rounded-base",
@@ -48,20 +51,20 @@ export default function ShowcaseContainer({
                   )}
                   target="_blank"
                   rel="noopener noreferrer"
-                  href={liveUrl}
+                  href={isSafeUrl(liveUrl) ? liveUrl : "#"}
                 >
                   Visit
                 </a>
                 {repoUrl && (
                   <a
                     style={{
-                      backgroundColor: `${color}`,
-                      color: text ? `${text}` : "black",
+                      backgroundColor: sanitizeColor(color),
+                      color: text ? sanitizeColor(text) : "black",
                     }}
                     className="text-center border-2 py-1.5 font-base shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none dark:hover:shadow-none transition-all border-border rounded-base"
                     target="_blank"
                     rel="noopener noreferrer"
-                    href={repoUrl}
+                    href={isSafeUrl(repoUrl) ? repoUrl : "#"}
                   >
                     Github repo
                   </a>

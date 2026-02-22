@@ -7,7 +7,13 @@ export const dynamic = "force-static"
 export async function generateMetadata() {
   const doc = getDocBySlug("")
   if (doc == null) return {}
-  return { title: doc.title, description: doc.description }
+  return {
+    title: doc.title,
+    description: doc.description,
+    alternates: {
+      canonical: "/docs",
+    },
+  }
 }
 
 export default function DocsIndexPage() {

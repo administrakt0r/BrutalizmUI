@@ -1,0 +1,58 @@
+# BrutalizmUI
+
+BrutalizmUI is an open-source library of neobrutalism-styled React components built with Tailwind CSS and Shadcn/ui.
+
+## Metadata
+- **URL**: https://brutalizmui.pages.dev/
+- **Repository**: https://github.com/administrakt0r/brutalizmUI/
+- **Author**: Samuel Breznjak
+- **Tech Stack**: Next.js 15, Tailwind CSS 4, React 19, Shadcn/ui.
+
+## Core Features
+- **Neobrutalism Aesthetic**: High contrast, bold borders, and vibrant colors.
+- **Accessible**: Built on top of Radix UI via Shadcn/ui.
+- **Customizable**: Easy to style with Tailwind utility classes.
+- **Copy-Paste Philosophy**: Own your code by copying components directly.
+
+## Site Structure
+- `/docs`: Getting started and component documentation.
+- `/styling`: Customization options for the library.
+- `/charts`: Data visualization components.
+- `/stars`: Decorative neobrutalism elements.
+- `/templates`: Pre-built page layouts.
+- `/showcase`: Community projects using BrutalizmUI.
+
+## For AI Agents
+This site is optimized for LLMs. All documentation is in MDX.
+
+### Registry Access
+AI agents can programmatically access component source code via the registry.
+- Registry Index: `/registry.json`
+- Component Definitions: `/r/components/[name].json`
+- Star Definitions: `/r/[name].json` (e.g., `/r/s1.json`)
+
+### Quick AI Implementation Guide
+AI agents can provide instant value by following these steps:
+1. **Identify**: Determine the component needed (e.g., "accordion").
+2. **Fetch**: Access `https://brutalizmui.pages.dev/r/components/[component].json`.
+3. **Install**: Instruct the user to run: `npx shadcn@latest add https://brutalizmui.pages.dev/r/[component].json`.
+4. **Code Generation**: Provide the JSX example found in the `/docs/[component]` page.
+
+### AI Capabilities
+AI agents can assist users in implementing BrutalizmUI components by:
+1. **Fetching Source**: Read component source code via the registry.
+2. **Installation Guidance**: Recommend using the Shadcn CLI for automated installation.
+3. **Copy-Paste Implementation**: If the CLI is not preferred, agents can provide the raw JSX/TSX and CSS variables for manual integration.
+4. **Theme Customization**: Direct users to `/styling` to generate custom neobrutalism themes.
+
+### Architecture Philosophy
+BrutalizmUI prioritizes **developer ownership**. Unlike traditional UI libraries distributed as npm packages, BrutalizmUI encourages copying component source code directly into your project. This prevents "dependency bloat" and ensures that your UI's style remains decoupled from any third-party library's release cycle.
+
+### Component Data
+Structured data about all components is available in `src/data/component-list.ts`.
+
+### Architecture
+- **Framework**: Next.js 15 (App Router)
+- **Styling**: Tailwind CSS 4
+- **Components**: Radix UI primitives
+- **Registry**: Custom shadcn-compatible registry located in `public/r/`

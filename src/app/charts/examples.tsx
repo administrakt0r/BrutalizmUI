@@ -1,15 +1,94 @@
+"use client"
+
+import * as React from "react"
+
 import { ChartExample, charts } from "@/data/charts"
 
+import { LazyRender } from "@/components/app/lazy-render"
 import { Pre } from "@/components/app/pre"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+
+// ⚡ Bolt: Create a lookup map for charts by name to optimize lookups from O(n) to O(1).
+const chartsByName = Object.fromEntries(
+  charts.map((chart) => [chart.name, chart]),
+)
+
+const FEATURED_CHARTS = [
+  chartsByName["ChartAreaStacked"],
+  chartsByName["ChartBarMultiple"],
+  chartsByName["ChartPieDonutText"],
+].filter(Boolean) as ChartExample[]
+
+const AREA_CHARTS = [
+  chartsByName["ChartAreaDefault"],
+  chartsByName["ChartAreaLinear"],
+  chartsByName["ChartAreaStep"],
+  chartsByName["ChartAreaStackedExpand"],
+  chartsByName["ChartAreaLegend"],
+  chartsByName["ChartAreaIcons"],
+  chartsByName["ChartAreaAxes"],
+].filter(Boolean) as ChartExample[]
+
+const INTERACTIVE_AREA_CHART = chartsByName["ChartAreaInteractive"]
+
+const BAR_CHARTS = [
+  chartsByName["ChartBarDefault"],
+  chartsByName["ChartBarHorizontal"],
+  chartsByName["ChartBarMultiple"],
+  chartsByName["ChartBarLabel"],
+  chartsByName["ChartBarLabelCustom"],
+  chartsByName["ChartBarMixed"],
+  chartsByName["ChartBarStacked"],
+  chartsByName["ChartBarActive"],
+  chartsByName["ChartBarNegative"],
+].filter(Boolean) as ChartExample[]
+
+const INTERACTIVE_BAR_CHART = chartsByName["ChartBarInteractive"]
+
+const LINE_CHARTS = [
+  chartsByName["ChartLineDefault"],
+  chartsByName["ChartLineLinear"],
+  chartsByName["ChartLineStep"],
+  chartsByName["ChartLineMultiple"],
+  chartsByName["ChartLineDots"],
+  chartsByName["ChartLineDotsCustom"],
+  chartsByName["ChartLineDotsColors"],
+  chartsByName["ChartLineLabel"],
+  chartsByName["ChartLineLabelCustom"],
+].filter(Boolean) as ChartExample[]
+
+const INTERACTIVE_LINE_CHART = chartsByName["ChartLineInteractive"]
+
+const PIE_CHARTS = [
+  chartsByName["ChartPieSimple"],
+  chartsByName["ChartPieLabel"],
+  chartsByName["ChartPieLabelCustom"],
+  chartsByName["ChartPieLabelList"],
+  chartsByName["ChartPieLegend"],
+  chartsByName["ChartPieDonut"],
+  chartsByName["ChartPieDonutActive"],
+  chartsByName["ChartPieDonutText"],
+  chartsByName["ChartPieStacked"],
+].filter(Boolean) as ChartExample[]
+
+const TOOLTIP_CHARTS = [
+  chartsByName["ChartTooltipDefault"],
+  chartsByName["ChartTooltipIndicatorLine"],
+  chartsByName["ChartTooltipIndicatorNone"],
+  chartsByName["ChartTooltipLabelCustom"],
+  chartsByName["ChartTooltipLabelFormatter"],
+  chartsByName["ChartTooltipLabelNone"],
+  chartsByName["ChartTooltipFormatter"],
+  chartsByName["ChartTooltipIcons"],
+  chartsByName["ChartTooltipAdvanced"],
+].filter(Boolean) as ChartExample[]
 
 export default function Examples() {
   return (
@@ -20,170 +99,91 @@ export default function Examples() {
           id="examples"
           className="grid flex-1 scroll-mt-20 items-start gap-10 md:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:gap-10"
         >
-          {[
-            charts.find((chart) => chart.name === "ChartAreaStacked"),
-            charts.find((chart) => chart.name === "ChartBarMultiple"),
-            charts.find((chart) => chart.name === "ChartPieDonutText"),
-          ].map((chart) => {
-            if (!chart) return null
-            return (
-              <ChartComponent chart={chart} key={chart.name}>
-                <chart.component />
-              </ChartComponent>
-            )
-          })}
+          {FEATURED_CHARTS.map((chart) => (
+            <ChartComponent chart={chart} key={chart.name}>
+              <chart.component />
+            </ChartComponent>
+          ))}
         </div>
         <div
           id="area-chart"
           className="grid flex-1 scroll-mt-20 items-start gap-10 md:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:gap-10"
         >
-          {[
-            charts.find((chart) => chart.name === "ChartAreaDefault"),
-            charts.find((chart) => chart.name === "ChartAreaLinear"),
-            charts.find((chart) => chart.name === "ChartAreaStep"),
-            charts.find((chart) => chart.name === "ChartAreaStackedExpand"),
-            charts.find((chart) => chart.name === "ChartAreaLegend"),
-            charts.find((chart) => chart.name === "ChartAreaIcons"),
-            charts.find((chart) => chart.name === "ChartAreaAxes"),
-          ].map((chart) => {
-            if (!chart) return null
-            return (
-              <ChartComponent chart={chart} key={chart.name}>
-                <chart.component />
-              </ChartComponent>
-            )
-          })}
+          {AREA_CHARTS.map((chart) => (
+            <ChartComponent chart={chart} key={chart.name}>
+              <chart.component />
+            </ChartComponent>
+          ))}
           <div className="md:col-span-2 lg:col-span-3">
-            {(() => {
-              const chart = charts.find(
-                (chart) => chart.name === "ChartAreaInteractive",
-              )
-              if (!chart) return null
-              return (
-                <ChartComponent chart={chart} key={chart.name}>
-                  <chart.component />
-                </ChartComponent>
-              )
-            })()}
+            {INTERACTIVE_AREA_CHART && (
+              <ChartComponent
+                chart={INTERACTIVE_AREA_CHART}
+                key={INTERACTIVE_AREA_CHART.name}
+              >
+                <INTERACTIVE_AREA_CHART.component />
+              </ChartComponent>
+            )}
           </div>
         </div>
         <div
           id="bar-chart"
           className="grid flex-1 scroll-mt-20 items-start gap-10 md:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:gap-10"
         >
-          {[
-            charts.find((chart) => chart.name === "ChartBarDefault"),
-            charts.find((chart) => chart.name === "ChartBarHorizontal"),
-            charts.find((chart) => chart.name === "ChartBarMultiple"),
-            charts.find((chart) => chart.name === "ChartBarLabel"),
-            charts.find((chart) => chart.name === "ChartBarLabelCustom"),
-            charts.find((chart) => chart.name === "ChartBarMixed"),
-            charts.find((chart) => chart.name === "ChartBarStacked"),
-            charts.find((chart) => chart.name === "ChartBarActive"),
-            charts.find((chart) => chart.name === "ChartBarNegative"),
-          ].map((chart) => {
-            if (!chart) return null
-            return (
-              <ChartComponent chart={chart} key={chart.name}>
-                <chart.component />
-              </ChartComponent>
-            )
-          })}
+          {BAR_CHARTS.map((chart) => (
+            <ChartComponent chart={chart} key={chart.name}>
+              <chart.component />
+            </ChartComponent>
+          ))}
           <div className="md:col-span-2 lg:col-span-3">
-            {(() => {
-              const chart = charts.find(
-                (chart) => chart.name === "ChartBarInteractive",
-              )
-              if (!chart) return null
-              return (
-                <ChartComponent chart={chart} key={chart.name}>
-                  <chart.component />
-                </ChartComponent>
-              )
-            })()}
+            {INTERACTIVE_BAR_CHART && (
+              <ChartComponent
+                chart={INTERACTIVE_BAR_CHART}
+                key={INTERACTIVE_BAR_CHART.name}
+              >
+                <INTERACTIVE_BAR_CHART.component />
+              </ChartComponent>
+            )}
           </div>
         </div>
         <div
           id="line-chart"
           className="grid flex-1 scroll-mt-20 items-start gap-10 md:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:gap-10"
         >
-          {[
-            charts.find((chart) => chart.name === "ChartLineDefault"),
-            charts.find((chart) => chart.name === "ChartLineLinear"),
-            charts.find((chart) => chart.name === "ChartLineStep"),
-            charts.find((chart) => chart.name === "ChartLineMultiple"),
-            charts.find((chart) => chart.name === "ChartLineDots"),
-            charts.find((chart) => chart.name === "ChartLineDotsCustom"),
-            charts.find((chart) => chart.name === "ChartLineDotsColors"),
-            charts.find((chart) => chart.name === "ChartLineLabel"),
-            charts.find((chart) => chart.name === "ChartLineLabelCustom"),
-          ].map((chart) => {
-            if (!chart) return null
-            return (
-              <ChartComponent chart={chart} key={chart.name}>
-                <chart.component />
-              </ChartComponent>
-            )
-          })}
+          {LINE_CHARTS.map((chart) => (
+            <ChartComponent chart={chart} key={chart.name}>
+              <chart.component />
+            </ChartComponent>
+          ))}
           <div className="md:col-span-2 lg:col-span-3">
-            {(() => {
-              const chart = charts.find(
-                (chart) => chart.name === "ChartLineInteractive",
-              )
-              if (!chart) return null
-              return (
-                <ChartComponent chart={chart} key={chart.name}>
-                  <chart.component />
-                </ChartComponent>
-              )
-            })()}
+            {INTERACTIVE_LINE_CHART && (
+              <ChartComponent
+                chart={INTERACTIVE_LINE_CHART}
+                key={INTERACTIVE_LINE_CHART.name}
+              >
+                <INTERACTIVE_LINE_CHART.component />
+              </ChartComponent>
+            )}
           </div>
         </div>
         <div
           id="pie-chart"
           className="grid flex-1 scroll-mt-20 items-start gap-10 md:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:gap-10"
         >
-          {[
-            charts.find((chart) => chart.name === "ChartPieSimple"),
-            charts.find((chart) => chart.name === "ChartPieLabel"),
-            charts.find((chart) => chart.name === "ChartPieLabelCustom"),
-            charts.find((chart) => chart.name === "ChartPieLabelList"),
-            charts.find((chart) => chart.name === "ChartPieLegend"),
-            charts.find((chart) => chart.name === "ChartPieDonut"),
-            charts.find((chart) => chart.name === "ChartPieDonutActive"),
-            charts.find((chart) => chart.name === "ChartPieDonutText"),
-            charts.find((chart) => chart.name === "ChartPieStacked"),
-          ].map((chart) => {
-            if (!chart) return null
-            return (
-              <ChartComponent chart={chart} key={chart.name}>
-                <chart.component />
-              </ChartComponent>
-            )
-          })}
+          {PIE_CHARTS.map((chart) => (
+            <ChartComponent chart={chart} key={chart.name}>
+              <chart.component />
+            </ChartComponent>
+          ))}
         </div>
         <div
           id="tooltip"
           className="chart-wrapper grid flex-1 scroll-mt-20 items-start gap-10 md:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:gap-10"
         >
-          {[
-            charts.find((chart) => chart.name === "ChartTooltipDefault"),
-            charts.find((chart) => chart.name === "ChartTooltipIndicatorLine"),
-            charts.find((chart) => chart.name === "ChartTooltipIndicatorNone"),
-            charts.find((chart) => chart.name === "ChartTooltipLabelCustom"),
-            charts.find((chart) => chart.name === "ChartTooltipLabelFormatter"),
-            charts.find((chart) => chart.name === "ChartTooltipLabelNone"),
-            charts.find((chart) => chart.name === "ChartTooltipFormatter"),
-            charts.find((chart) => chart.name === "ChartTooltipIcons"),
-            charts.find((chart) => chart.name === "ChartTooltipAdvanced"),
-          ].map((chart) => {
-            if (!chart) return null
-            return (
-              <ChartComponent chart={chart} key={chart.name}>
-                <chart.component />
-              </ChartComponent>
-            )
-          })}
+          {TOOLTIP_CHARTS.map((chart) => (
+            <ChartComponent chart={chart} key={chart.name}>
+              <chart.component />
+            </ChartComponent>
+          ))}
         </div>
       </div>
     </div>
@@ -197,11 +197,28 @@ const ChartComponent = ({
   children: React.ReactNode
   chart: ChartExample
 }) => {
-  const { code, name } = chart
+  const { name, slug } = chart
+  const [code, setCode] = React.useState<string | null>(null)
+  const [isOpen, setIsOpen] = React.useState(false)
+
+  React.useEffect(() => {
+    if (isOpen && !code) {
+      fetch(`/r/charts/${slug}.json`)
+        .then((res) => res.json())
+        .then((data) => {
+          setCode(data.files[0].content)
+        })
+        .catch((err) => {
+          console.error("Failed to fetch chart code:", err)
+          setCode("// Failed to load code.")
+        })
+    }
+  }, [isOpen, code, slug])
+
   return (
     <div>
-      {children}
-      <Dialog>
+      <LazyRender className="min-h-[350px]">{children}</LazyRender>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
           <Button className="mt-5 w-full">Copy</Button>
         </DialogTrigger>
@@ -211,9 +228,9 @@ const ChartComponent = ({
           </DialogHeader>
           <Pre
             wrapperClassName="w-full max-w-full text-white overflow-x-auto"
-            __rawstring__={code}
+            __rawstring__={code || ""}
           >
-            {code}
+            {code || "Loading code..."}
           </Pre>
         </DialogContent>
       </Dialog>

@@ -17,6 +17,8 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
   )
 }
 
+Table.displayName = "Table"
+
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
     <thead
@@ -27,6 +29,8 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   )
 }
 
+TableHeader.displayName = "TableHeader"
+
 function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
   return (
     <tbody
@@ -36,6 +40,8 @@ function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
     />
   )
 }
+
+TableBody.displayName = "TableBody"
 
 function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   return (
@@ -50,6 +56,8 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   )
 }
 
+TableFooter.displayName = "TableFooter"
+
 function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   return (
     <tr
@@ -62,6 +70,8 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     />
   )
 }
+
+TableRow.displayName = "TableRow"
 
 function TableHead({ className, ...props }: React.ComponentProps<"th">) {
   return (
@@ -76,6 +86,8 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
   )
 }
 
+TableHead.displayName = "TableHead"
+
 function TableCell({ className, ...props }: React.ComponentProps<"td">) {
   return (
     <td
@@ -89,6 +101,8 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
   )
 }
 
+TableCell.displayName = "TableCell"
+
 function TableCaption({
   className,
   ...props
@@ -101,6 +115,8 @@ function TableCaption({
     />
   )
 }
+
+TableCaption.displayName = "TableCaption"
 
 export {
   Table,

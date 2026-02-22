@@ -4,6 +4,11 @@ import * as RechartsPrimitive from "recharts"
 
 import * as React from "react"
 
+import {
+  escapeCSSString,
+  sanitizeColor,
+  sanitizeCSSVariable,
+} from "@/lib/security"
 import { cn } from "@/lib/utils"
 
 // Format: { THEME_NAME: CSS_SELECTOR }
@@ -35,23 +40,28 @@ function useChart() {
   return context
 }
 
+export type ChartContainerProps = React.ComponentProps<"div"> & {
+  config: ChartConfig
+  children: React.ComponentProps<
+    typeof RechartsPrimitive.ResponsiveContainer
+  >["children"]
+}
+
 function ChartContainer({
   id,
   className,
   children,
   config,
   ...props
-}: React.ComponentProps<"div"> & {
-  config: ChartConfig
-  children: React.ComponentProps<
-    typeof RechartsPrimitive.ResponsiveContainer
-  >["children"]
-}) {
+}: ChartContainerProps) {
   const uniqueId = React.useId()
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
 
+  // ⚡ Bolt: Memoize context value to prevent consumers from re-rendering when config is stable.
+  const contextValue = React.useMemo(() => ({ config }), [config])
+
   return (
-    <ChartContext.Provider value={{ config }}>
+    <ChartContext.Provider value={contextValue}>
       <div
         data-slot="chart"
         data-chart={chartId}
@@ -71,40 +81,61 @@ function ChartContainer({
   )
 }
 
-const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
-  const colorConfig = Object.entries(config).filter(
-    ([, config]) => config.theme || config.color,
-  )
+ChartContainer.displayName = "ChartContainer"
 
-  if (!colorConfig.length) {
-    return null
-  }
+// ⚡ Bolt: Memoize ChartStyle to prevent unnecessary re-renders and DOM updates of the <style> tag.
+const ChartStyle = React.memo(
+  ({ id, config }: { id: string; config: ChartConfig }) => {
+    const colorConfig = Object.entries(config).filter(
+      ([, config]) => config.theme || config.color,
+    )
 
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
+    if (!colorConfig.length) {
+      return null
+    }
+
+    return (
+      <style
+        dangerouslySetInnerHTML={{
+          __html: Object.entries(THEMES)
+            .map(
+              ([theme, prefix]) => `
+${prefix} [data-chart="${escapeCSSString(id)}"] {
 ${colorConfig
   .map(([key, itemConfig]) => {
     const color =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
       itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
+    const sanitizedColorValue = color ? sanitizeColor(color) : null
+    const sanitizedKey = sanitizeCSSVariable(key)
+    return sanitizedColorValue && sanitizedKey
+      ? `  --color-${sanitizedKey}: ${sanitizedColorValue};`
+      : null
   })
   .join("\n")}
 }
 `,
-          )
-          .join("\n"),
-      }}
-    />
-  )
-}
+            )
+            .join("\n"),
+        }}
+      />
+    )
+  },
+)
+
+ChartStyle.displayName = "ChartStyle"
 
 const ChartTooltip = RechartsPrimitive.Tooltip
+
+export type ChartTooltipContentProps =
+  React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
+    React.ComponentProps<"div"> & {
+      hideLabel?: boolean
+      hideIndicator?: boolean
+      indicator?: "line" | "dot" | "dashed"
+      nameKey?: string
+      labelKey?: string
+    }
 
 function ChartTooltipContent({
   active,
@@ -120,14 +151,7 @@ function ChartTooltipContent({
   color,
   nameKey,
   labelKey,
-}: React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
-  React.ComponentProps<"div"> & {
-    hideLabel?: boolean
-    hideIndicator?: boolean
-    indicator?: "line" | "dot" | "dashed"
-    nameKey?: string
-    labelKey?: string
-  }) {
+}: ChartTooltipContentProps) {
   const { config } = useChart()
 
   const tooltipLabel = React.useMemo(() => {
@@ -251,7 +275,15 @@ function ChartTooltipContent({
   )
 }
 
+ChartTooltipContent.displayName = "ChartTooltipContent"
+
 const ChartLegend = RechartsPrimitive.Legend
+
+export type ChartLegendContentProps = React.ComponentProps<"div"> &
+  Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
+    hideIcon?: boolean
+    nameKey?: string
+  }
 
 function ChartLegendContent({
   className,
@@ -259,11 +291,7 @@ function ChartLegendContent({
   payload,
   verticalAlign = "bottom",
   nameKey,
-}: React.ComponentProps<"div"> &
-  Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
-    hideIcon?: boolean
-    nameKey?: string
-  }) {
+}: ChartLegendContentProps) {
   const { config } = useChart()
 
   if (!payload?.length) {
@@ -306,6 +334,8 @@ function ChartLegendContent({
     </div>
   )
 }
+
+ChartLegendContent.displayName = "ChartLegendContent"
 
 // Helper to extract item config from a payload.
 function getPayloadConfigFromPayload(

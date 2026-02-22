@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client"
 
 import * as React from "react"
@@ -14,15 +13,12 @@ interface TocProps {
 }
 
 export function TableOfContents({ items }: TocProps) {
-  const itemIds = React.useMemo(() => items.map((item) => item.id), [items])
+  const itemIds = React.useMemo(
+    () => (items ? items.map((item) => item.id) : []),
+    [items],
+  )
   const activeHeading = useActiveItem(itemIds)
-  const [isMounted, setIsMounted] = React.useState(false)
-
-  React.useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
-  if (!isMounted || !items?.length) {
+  if (!items?.length) {
     return null
   }
 
@@ -34,6 +30,7 @@ export function TableOfContents({ items }: TocProps) {
           <a
             key={id}
             href={`#${id}`}
+            aria-current={id === activeHeading ? "location" : undefined}
             className={cn(
               "block border-t-3 text-foreground border-t-border last:border-b-3 last:border-b-border hover:bg-main/70 hover:text-main-foreground font-base py-1 pr-3",
               depth === 2 ? "pl-3" : depth === 3 ? "pl-6" : "pl-9",
@@ -50,7 +47,7 @@ export function TableOfContents({ items }: TocProps) {
 }
 
 function useActiveItem(itemIds: string[]) {
-  const [activeId, setActiveId] = React.useState(null)
+  const [activeId, setActiveId] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     const observer = new IntersectionObserver(
@@ -82,10 +79,4 @@ function useActiveItem(itemIds: string[]) {
   }, [itemIds])
 
   return activeId
-}
-
-interface TreeProps {
-  tree: TableOfContents
-  depth?: number
-  activeItem?: string
 }

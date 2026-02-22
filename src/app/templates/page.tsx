@@ -13,6 +13,9 @@ import ShowcaseContainer from "@/components/app/showcase-container"
 export const metadata: Metadata = {
   title: "Templates",
   description: "Get started with neobrutalism templates.",
+  alternates: {
+    canonical: "/templates",
+  },
 }
 
 export default function Page() {

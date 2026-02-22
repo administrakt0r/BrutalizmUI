@@ -1,6 +1,14 @@
 {
-  "extends": ["next", "prettier"],
+  "extends": ["next", "prettier", "plugin:security/recommended-legacy"],
   "rules": {
-    "@next/next/no-img-element": 0
-  }
+    "security/detect-object-injection": "off"
+  },
+  "overrides": [
+    {
+      "files": ["src/scripts/**/*.ts"],
+      "rules": {
+        "security/detect-non-literal-fs-filename": "off"
+      }
+    }
+  ]
 }

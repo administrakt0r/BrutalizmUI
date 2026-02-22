@@ -11,7 +11,7 @@ export default function SonnerCancelDemo() {
         toast("Event has been created", {
           cancel: {
             label: "Cancel",
-            onClick: () => console.log("Cancel"),
+            onClick: () => toast("Action Cancelled"),
           },
         })
       }

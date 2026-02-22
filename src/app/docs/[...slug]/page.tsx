@@ -19,7 +19,13 @@ export async function generateMetadata(props: DocPageProps) {
   const slugAsParams = (await props.params).slug.join("/")
   const doc = getDocBySlug(slugAsParams)
   if (doc == null) return {}
-  return { title: doc.title, description: doc.description }
+  return {
+    title: doc.title,
+    description: doc.description,
+    alternates: {
+      canonical: `/docs/${slugAsParams}`,
+    },
+  }
 }
 
 export async function generateStaticParams(): Promise<

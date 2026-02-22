@@ -27,9 +27,7 @@ type FormFieldContextValue<
   name: TName
 }
 
-const FormFieldContext = React.createContext<FormFieldContextValue>(
-  {} as FormFieldContextValue,
-)
+const FormFieldContext = React.createContext<FormFieldContextValue | null>(null)
 
 function FormField<
   TFieldValues extends FieldValues = FieldValues,
@@ -41,16 +39,22 @@ function FormField<
     </FormFieldContext.Provider>
   )
 }
+FormField.displayName = "FormField"
 
 const useFormField = () => {
   const fieldContext = React.useContext(FormFieldContext)
   const itemContext = React.useContext(FormItemContext)
   const { getFieldState } = useFormContext()
-  const formState = useFormState({ name: fieldContext.name })
-  const fieldState = getFieldState(fieldContext.name, formState)
 
   if (!fieldContext) {
     throw new Error("useFormField should be used within <FormField>")
+  }
+
+  const formState = useFormState({ name: fieldContext.name })
+  const fieldState = getFieldState(fieldContext.name, formState)
+
+  if (!itemContext) {
+    throw new Error("useFormField should be used within <FormItem>")
   }
 
   const { id } = itemContext
@@ -69,9 +73,7 @@ type FormItemContextValue = {
   id: string
 }
 
-const FormItemContext = React.createContext<FormItemContextValue>(
-  {} as FormItemContextValue,
-)
+const FormItemContext = React.createContext<FormItemContextValue | null>(null)
 
 function FormItem({ className, ...props }: React.ComponentProps<"div">) {
   const id = React.useId()
@@ -86,6 +88,7 @@ function FormItem({ className, ...props }: React.ComponentProps<"div">) {
     </FormItemContext.Provider>
   )
 }
+FormItem.displayName = "FormItem"
 
 function FormLabel({
   className,
@@ -103,6 +106,7 @@ function FormLabel({
     />
   )
 }
+FormLabel.displayName = "FormLabel"
 
 function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
   const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
@@ -121,6 +125,7 @@ function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
     />
   )
 }
+FormControl.displayName = "FormControl"
 
 function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
   const { formDescriptionId } = useFormField()
@@ -134,6 +139,7 @@ function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
     />
   )
 }
+FormDescription.displayName = "FormDescription"
 
 function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
   const { error, formMessageId } = useFormField()
@@ -154,6 +160,7 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
     </p>
   )
 }
+FormMessage.displayName = "FormMessage"
 
 export {
   useFormField,

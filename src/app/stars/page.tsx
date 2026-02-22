@@ -13,6 +13,9 @@ import StarsGrid from "./stars-grid"
 export const metadata: Metadata = {
   title: "Stars",
   description: "Get started with neobrutalism stars.",
+  alternates: {
+    canonical: "/stars",
+  },
 }
 
 export default function Page() {

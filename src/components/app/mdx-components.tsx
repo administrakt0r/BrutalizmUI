@@ -1,7 +1,9 @@
 import { Toc } from "@stefanprobst/rehype-extract-toc"
 import { CircleAlert } from "lucide-react"
 
+import { useMemo } from "react"
 import * as runtime from "react/jsx-runtime"
+import dynamic from "next/dynamic"
 import Link from "next/link"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -13,48 +15,28 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
+import { isSafeUrl } from "@/lib/security"
 import { cn } from "@/lib/utils"
 
-import ComponentPreview from "./component-preview"
+import {
+  MdxTabs,
+  MdxTabsContent,
+  MdxTabsList,
+  MdxTabsTrigger,
+} from "./mdx-tabs"
 import { Pre } from "./pre"
 import ShadcnCliCommand from "./shadcn-cli-command"
 
+// ⚡ Bolt: Use dynamic import for ComponentPreview to break the static dependency
+// chain from the main bundle to the 50+ component examples.
+const ComponentPreview = dynamic(() => import("./component-preview"))
+
 export const sharedComponents = {
-  Tabs: ({ className, ...props }: React.ComponentProps<typeof Tabs>) => (
-    <Tabs className={cn("w-full shadow-shadow", className)} {...props} />
-  ),
-  TabsList: ({
-    className,
-    ...props
-  }: React.ComponentProps<typeof TabsList>) => (
-    <TabsList
-      className={cn(
-        "w-full overflow-x-hidden rounded-none sm:h-12 h-10 p-0 bg-secondary-background",
-        className,
-      )}
-      {...props}
-    />
-  ),
-  TabsTrigger: ({
-    className,
-    ...props
-  }: React.ComponentProps<typeof TabsTrigger>) => (
-    <TabsTrigger
-      className={cn(
-        "h-full border-0 border-r-2 z-10 border-r-border rounded-none sm:text-base data-[state=active]:text-main-foreground text-foreground last:border-r-0",
-        className,
-      )}
-      {...props}
-    />
-  ),
-  TabsContent: ({
-    className,
-    ...props
-  }: React.ComponentProps<typeof TabsContent>) => (
-    <TabsContent className="mt-0 rounded-none" {...props} />
-  ),
+  Tabs: MdxTabs,
+  TabsList: MdxTabsList,
+  TabsTrigger: MdxTabsTrigger,
+  TabsContent: MdxTabsContent,
   Warning: ({
     description,
     className,
@@ -74,23 +56,66 @@ export const sharedComponents = {
       </AlertDescription>
     </Alert>
   ),
-  Link: ({ ...props }: React.ComponentProps<typeof Link>) => {
-    const isBlank = props.target === "_blank"
-    const rel = isBlank
-      ? props.rel
-        ? `${props.rel} noopener noreferrer`
-        : "noopener noreferrer"
-      : props.rel
-    return <Link {...props} rel={rel} />
+  Link: ({ href, ...props }: React.ComponentProps<typeof Link>) => {
+    const safeHref = isSafeUrl(href.toString()) ? href : "#"
+    const isExternal =
+      href.toString().startsWith("http") || href.toString().startsWith("//")
+    const isBlank = props.target === "_blank" || isExternal
+
+    let rel = props.rel
+    if (isBlank) {
+      const rels = props.rel ? props.rel.split(" ") : []
+      if (!rels.includes("noopener")) rels.push("noopener")
+      if (isExternal && !rels.includes("noreferrer")) rels.push("noreferrer")
+      rel = rels.join(" ")
+    }
+
+    return (
+      <Link
+        {...props}
+        href={safeHref}
+        rel={rel}
+        target={isBlank ? "_blank" : props.target}
+      />
+    )
   },
-  a: ({ ...props }: React.ComponentProps<"a">) => {
-    const isBlank = props.target === "_blank"
-    const rel = isBlank
-      ? props.rel
-        ? `${props.rel} noopener noreferrer`
-        : "noopener noreferrer"
-      : props.rel
-    return <a {...props} rel={rel} />
+  a: ({ href, ...props }: React.ComponentProps<"a">) => {
+    const safeHref = href && isSafeUrl(href) ? href : "#"
+    const isExternal = href?.startsWith("http") || href?.startsWith("//")
+    const isBlank = props.target === "_blank" || isExternal
+
+    let rel = props.rel
+    if (isBlank) {
+      const rels = props.rel ? props.rel.split(" ") : []
+      if (!rels.includes("noopener")) rels.push("noopener")
+      if (isExternal && !rels.includes("noreferrer")) rels.push("noreferrer")
+      rel = rels.join(" ")
+    }
+
+    return (
+      <a
+        {...props}
+        href={safeHref}
+        rel={rel}
+        target={isBlank ? "_blank" : props.target}
+      />
+    )
+  },
+  img: (props: React.ComponentProps<"img">) => {
+    const safeSrc =
+      props.src && (isSafeUrl(props.src) || props.src.startsWith("data:image/"))
+        ? props.src
+        : undefined
+
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        {...props}
+        src={safeSrc}
+        className={cn("rounded-md border", props.className)}
+        alt={props.alt || "Image"}
+      />
+    )
   },
   pre: Pre,
   ShadcnCliCommand,
@@ -128,11 +153,13 @@ export const sharedComponents = {
 }
 
 const useMDXComponent = (code: string) => {
-  const fn = new Function(code)
-  return {
-    Component: fn({ ...runtime }).default,
-    TableOfContents: fn({ ...runtime }).toc as Toc,
-  }
+  return useMemo(() => {
+    const fn = new Function(code)
+    return {
+      Component: fn({ ...runtime }).default,
+      TableOfContents: fn({ ...runtime }).toc as Toc,
+    }
+  }, [code])
 }
 
 interface MDXProps {
@@ -142,7 +169,15 @@ interface MDXProps {
 
 export const MDXContent = ({ code, components }: MDXProps) => {
   const { Component } = useMDXComponent(code)
-  return <Component components={{ ...sharedComponents, ...components }} />
+
+  // ⚡ Bolt: Memoize components object to prevent unnecessary re-renders
+  // of the MDX component tree when the parent re-renders.
+  const combinedComponents = useMemo(
+    () => ({ ...sharedComponents, ...components }),
+    [components],
+  )
+
+  return <Component components={combinedComponents} />
 }
 
 export function MDXTableOfContents({ code }: { code: string }) {

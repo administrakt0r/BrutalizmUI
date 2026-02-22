@@ -26,6 +26,7 @@ function InputOTP({
     />
   )
 }
+InputOTP.displayName = "InputOTP"
 
 function InputOTPGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
@@ -36,6 +37,7 @@ function InputOTPGroup({ className, ...props }: React.ComponentProps<"div">) {
     />
   )
 }
+InputOTPGroup.displayName = "InputOTPGroup"
 
 function InputOTPSlot({
   index,
@@ -65,6 +67,7 @@ function InputOTPSlot({
     </div>
   )
 }
+InputOTPSlot.displayName = "InputOTPSlot"
 
 function InputOTPSeparator({ ...props }: React.ComponentProps<"div">) {
   return (
@@ -73,5 +76,6 @@ function InputOTPSeparator({ ...props }: React.ComponentProps<"div">) {
     </div>
   )
 }
+InputOTPSeparator.displayName = "InputOTPSeparator"
 
 export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator }

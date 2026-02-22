@@ -1,6 +1,6 @@
 "use client"
 
-import { useLayoutEffect, useState } from "react"
+import { useCallback, useLayoutEffect, useMemo, useState } from "react"
 
 import colors from "@/data/colors"
 
@@ -33,12 +33,37 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 
+import { sanitizeColor, sanitizeCSSVariable } from "@/lib/security"
 import { cn } from "@/lib/utils"
 
-export default function Styling() {
-  const defaultColorPalette =
-    colors.find((color) => color.name === "sunset") ?? colors[0]
+// ⚡ Bolt: Define the structure for color palette to ensure type safety.
+interface ColorPalette {
+  name: string
+  main: string
+  darkMain: string
+  bg: string
+  darkBg: string
+  chart1: string
+  chart2: string
+  chart3: string
+  chart4: string
+  chart5: string
+  darkChart1: string
+  darkChart2: string
+  darkChart3: string
+  darkChart4: string
+  darkChart5: string
+}
 
+// ⚡ Bolt: Create a lookup map for colors by name to optimize lookups from O(n) to O(1).
+const colorsByName = Object.fromEntries(
+  colors.map((color) => [color.name, color as ColorPalette]),
+)
+
+const defaultColorPalette =
+  colorsByName["sunset"] ?? (colors[0] as ColorPalette)
+
+export default function Styling() {
   const [
     {
       bg,
@@ -58,37 +83,61 @@ export default function Styling() {
       darkChart5,
     },
     setColor,
-  ] = useState(defaultColorPalette)
+  ] = useState<ColorPalette>(defaultColorPalette)
   const [borderRadius, setBorderRadius] = useState(5)
   const [boxShadowLength, setBoxShadowLength] = useState([4, 4])
   const [fontWeight, setFontWeight] = useState([700, 500])
 
   useLayoutEffect(() => {
-    const colorObj = JSON.parse(localStorage.getItem("color") as string)
-    const borderRadius = Number(localStorage.getItem("borderRadius"))
-    const boxShadow = localStorage.getItem("boxShadow")?.split(",")
-    const fontWeight = localStorage.getItem("fontWeight")?.split(",")
+    // ⚡ Bolt: Wrapped localStorage JSON.parse in try-catch for runtime safety.
+    try {
+      const colorJson = localStorage.getItem("color")
+      const colorObj = colorJson ? JSON.parse(colorJson) : null
+      const borderRadius = Number(localStorage.getItem("borderRadius"))
+      const boxShadow = localStorage.getItem("boxShadow")?.split(",")
+      const fontWeight = localStorage.getItem("fontWeight")?.split(",")
 
-    if (colorObj) {
-      setColor(colorObj)
-    }
+      if (colorObj && typeof colorObj === "object") {
+        // Sanitize all color fields and keys before setting state
+        const sanitizedEntries = Object.entries(colorObj)
+          .map(([key, value]) => {
+            const sanitizedKey = sanitizeCSSVariable(key)
+            const sanitizedValue =
+              typeof value === "string" ? sanitizeColor(value) : ""
+            return [sanitizedKey, sanitizedValue]
+          })
+          .filter(([key, value]) => key !== "" && value !== "")
 
-    if (borderRadius) {
-      setBorderRadius(borderRadius)
-    }
+        const sanitizedColorObj = Object.fromEntries(
+          sanitizedEntries,
+        ) as unknown as ColorPalette
 
-    if (boxShadow) {
-      setBoxShadowLength([+boxShadow[0], +boxShadow[1]])
-    }
+        // Ensure we have at least the required name property to consider it valid
+        if (sanitizedColorObj.name) {
+          setColor((prev) => ({ ...prev, ...sanitizedColorObj }))
+        }
+      }
 
-    if (fontWeight) {
-      setFontWeight([+fontWeight[0], +fontWeight[1]])
+      if (borderRadius) {
+        setBorderRadius(borderRadius)
+      }
+
+      if (boxShadow) {
+        setBoxShadowLength([+boxShadow[0], +boxShadow[1]])
+      }
+
+      if (fontWeight) {
+        setFontWeight([+fontWeight[0], +fontWeight[1]])
+      }
+    } catch (e) {
+      console.error("Failed to parse styling from localStorage", e)
     }
   }, [])
 
-  const updateColor = (value: string) => {
+  // ⚡ Bolt: Memoized event handlers to prevent re-creation on every render.
+  const updateColor = useCallback((value: string) => {
     const r = window.document.querySelector(":root") as HTMLElement
-    const color = colors.find((color) => color.name === value)!
+    const color = colorsByName[value]!
 
     setColor(color)
 
@@ -118,54 +167,62 @@ export default function Styling() {
     r.style.setProperty("--dark-main", color.darkMain)
     r.style.setProperty("--light-background", color.bg)
     r.style.setProperty("--light-main", color.main)
-  }
+  }, [])
 
-  const updateBorderRadius = (value: number) => {
+  const updateBorderRadius = useCallback((value: number) => {
     const r = window.document.querySelector(":root") as HTMLElement
     r.style.setProperty("--border-radius", `${value}px`)
 
     localStorage.setItem("borderRadius", value.toString())
 
     setBorderRadius(value)
-  }
+  }, [])
 
-  const updateHorizontalBoxShadow = (value: number) => {
+  const updateHorizontalBoxShadow = useCallback((value: number) => {
     const r = window.document.querySelector(":root") as HTMLElement
     r.style.setProperty("--box-shadow-x", value + "px")
 
-    setBoxShadowLength([value, boxShadowLength[1]])
+    setBoxShadowLength((prev) => {
+      const next: [number, number] = [value, prev[1]]
+      localStorage.setItem("boxShadow", next.join(","))
+      return next
+    })
+  }, [])
 
-    localStorage.setItem("boxShadow", `${value},${boxShadowLength[1]}`)
-  }
-
-  const updateVerticalBoxShadow = (value: number) => {
+  const updateVerticalBoxShadow = useCallback((value: number) => {
     const r = window.document.querySelector(":root") as HTMLElement
     r.style.setProperty("--box-shadow-y", value + "px")
 
-    setBoxShadowLength([boxShadowLength[0], value])
+    setBoxShadowLength((prev) => {
+      const next: [number, number] = [prev[0], value]
+      localStorage.setItem("boxShadow", next.join(","))
+      return next
+    })
+  }, [])
 
-    localStorage.setItem("boxShadow", `${boxShadowLength[0]},${value}`)
-  }
-
-  const updateHeadingFontWeight = (value: number) => {
+  const updateHeadingFontWeight = useCallback((value: number) => {
     const r = window.document.querySelector(":root") as HTMLElement
     r.style.setProperty("--heading-font-weight", `${value}`)
 
-    setFontWeight([value, fontWeight[1]])
+    setFontWeight((prev) => {
+      const next: [number, number] = [value, prev[1]]
+      localStorage.setItem("fontWeight", next.join(","))
+      return next
+    })
+  }, [])
 
-    localStorage.setItem("fontWeight", `${value},${fontWeight[1]}`)
-  }
-
-  const updateBaseFontWeight = (value: number) => {
+  const updateBaseFontWeight = useCallback((value: number) => {
     const r = window.document.querySelector(":root") as HTMLElement
     r.style.setProperty("--base-font-weight", `${value}`)
 
-    setFontWeight([fontWeight[0], value])
+    setFontWeight((prev) => {
+      const next: [number, number] = [prev[0], value]
+      localStorage.setItem("fontWeight", next.join(","))
+      return next
+    })
+  }, [])
 
-    localStorage.setItem("fontWeight", `${fontWeight[0]},${value}`)
-  }
-
-  const resetStyling = () => {
+  const resetStyling = useCallback(() => {
     const r = window.document.querySelector(":root") as HTMLElement
 
     updateColor(defaultColorPalette.name)
@@ -182,9 +239,11 @@ export default function Styling() {
     setFontWeight([700, 500])
 
     localStorage.clear()
-  }
+  }, [updateColor])
 
-  const styling = `@import "tailwindcss";
+  // ⚡ Bolt: Memoize the large CSS template literal to prevent re-computation on every render.
+  const styling = useMemo(
+    () => `@import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -257,7 +316,27 @@ export default function Styling() {
   h1, h2, h3, h4, h5, h6{
     @apply font-heading;
   }
-}`
+}`,
+    [
+      bg,
+      main,
+      boxShadowLength,
+      chart1,
+      chart2,
+      chart3,
+      chart4,
+      chart5,
+      darkBg,
+      darkMain,
+      darkChart1,
+      darkChart2,
+      darkChart3,
+      darkChart4,
+      darkChart5,
+      borderRadius,
+      fontWeight,
+    ],
+  )
 
   return (
     <div className="flex items-center justify-center gap-4">

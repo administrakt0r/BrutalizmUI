@@ -13,6 +13,12 @@ node_modules
 out/
 build
 .swc/
+*.log
+dev_*
+output_*
+output*
+verification_*
+verification*
 
 # production
 /build

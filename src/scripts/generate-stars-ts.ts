@@ -28,6 +28,9 @@ const exampleKeys = [
   "with-stroke",
 ]
 
+// Add dynamic import statement first
+imports.push(`import dynamic from "next/dynamic";`)
+
 starFiles.forEach((file) => {
   const match = file.match(/s(\d+)\.tsx$/)
   if (!match) return
@@ -35,28 +38,24 @@ starFiles.forEach((file) => {
   const starNumber = match[1]
   const componentName = `Star${starNumber}`
   const importPath = `@/examples/stars/s${starNumber}`
-  const filePath = path.join(starsDir, file)
 
-  try {
-    const code = fs.readFileSync(filePath, "utf-8")
-
-    imports.push(`import ${componentName} from "${importPath}";`)
-    starsArray.push(
-      `  { componentExample: ${componentName}, code: \`${code.replace(/`/g, "\\`")}\` }`,
-    )
-  } catch (error) {
-    console.error(`Failed to read ${filePath}:`, error)
-  }
+  // Changed to dynamic import
+  imports.push(
+    `const ${componentName} = dynamic(() => import("${importPath}"));`,
+  )
+  starsArray.push(
+    `  { id: "s${starNumber}", componentExample: ${componentName} }`,
+  )
 })
 
-// Add example imports
+// Add example imports as dynamic
 exampleKeys.forEach((key) => {
   const componentName = key
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join("")
   exampleImports.push(
-    `import ${componentName} from "@/examples/stars/docs/${key}";`,
+    `const ${componentName} = dynamic(() => import("@/examples/stars/docs/${key}"));`,
   )
 })
 
@@ -64,11 +63,12 @@ const newStarsContent = `
 // Auto-generated file. Do not modify manually.
 
 ${imports.join("\n")}
+
 ${exampleImports.join("\n")}
 
 type Star = {
+  id: string;
   componentExample: React.ComponentType;
-  code: string;
 };
 
 const STARS: Star[] = [

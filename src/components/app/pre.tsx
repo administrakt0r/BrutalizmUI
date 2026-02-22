@@ -15,7 +15,12 @@ export function Pre(props: PreProps) {
       data-slot="pre-wrapper"
       className={cn("relative shadow-shadow", wrapperClassName)}
     >
-      <pre className="bg-black border-2 border-border code text-sm max-h-[300px] overflow-auto p-4 not-prose">
+      <pre
+        tabIndex={0}
+        role="region"
+        aria-label="Code snippet"
+        className="bg-black border-2 border-border code text-sm max-h-[300px] overflow-auto p-4 not-prose focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 outline-none"
+      >
         <CopyButton text={__rawstring__} />
         {children}
       </pre>

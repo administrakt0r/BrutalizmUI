@@ -6,6 +6,11 @@ import { useTheme } from "next-themes"
 import * as React from "react"
 
 import { Button } from "@/components/ui/button"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export function ThemeSwitcher() {
   const { setTheme, theme } = useTheme()
@@ -34,14 +39,24 @@ export function ThemeSwitcher() {
 
   return (
     <>
-      <Button
-        className="size-9 p-0 [&_svg]:size-5 shadow-nav hover:translate-x-[4px]! hover:translate-y-[4px]! hover:shadow-none bg-secondary-background"
-        onClick={handleThemeChange}
-      >
-        <Sun className="hidden dark:inline stroke-foreground" />
-        <Moon className="inline dark:hidden stroke-foreground" />
-        <span className="sr-only">Toggle theme</span>
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            className="size-9 p-0 [&_svg]:size-5 shadow-nav hover:translate-x-[4px]! hover:translate-y-[4px]! hover:shadow-none bg-secondary-background"
+            onClick={handleThemeChange}
+            aria-label="Toggle theme"
+          >
+            <Sun className="hidden dark:inline stroke-foreground" />
+            <Moon className="inline dark:hidden stroke-foreground" />
+            <span className="sr-only">Toggle theme</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Toggle theme</p>
+        </TooltipContent>
+      </Tooltip>
     </>
   )
 }
+
+ThemeSwitcher.displayName = "ThemeSwitcher"

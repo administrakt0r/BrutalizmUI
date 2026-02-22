@@ -6,10 +6,9 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function Avatar({
-  className,
-  ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Root>) {
+export type AvatarProps = React.ComponentProps<typeof AvatarPrimitive.Root>
+
+function Avatar({ className, ...props }: AvatarProps) {
   return (
     <AvatarPrimitive.Root
       data-slot="avatar"
@@ -22,10 +21,13 @@ function Avatar({
   )
 }
 
-function AvatarImage({
-  className,
-  ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Image>) {
+Avatar.displayName = "Avatar"
+
+export type AvatarImageProps = React.ComponentProps<
+  typeof AvatarPrimitive.Image
+>
+
+function AvatarImage({ className, ...props }: AvatarImageProps) {
   return (
     <AvatarPrimitive.Image
       data-slot="avatar-image"
@@ -35,10 +37,13 @@ function AvatarImage({
   )
 }
 
-function AvatarFallback({
-  className,
-  ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
+AvatarImage.displayName = "AvatarImage"
+
+export type AvatarFallbackProps = React.ComponentProps<
+  typeof AvatarPrimitive.Fallback
+>
+
+function AvatarFallback({ className, ...props }: AvatarFallbackProps) {
   return (
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
@@ -50,5 +55,7 @@ function AvatarFallback({
     />
   )
 }
+
+AvatarFallback.displayName = "AvatarFallback"
 
 export { Avatar, AvatarImage, AvatarFallback }
