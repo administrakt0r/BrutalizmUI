@@ -1,19 +1,27 @@
+import * as React from "react"
+
 import { cn } from "@/lib/utils"
 
-export type SkeletonProps = React.ComponentProps<"div">
+export type SkeletonProps = React.ComponentPropsWithoutRef<"div">
 
-function Skeleton({ className, ...props }: SkeletonProps) {
-  return (
-    <div
-      data-slot="skeleton"
-      className={cn(
-        "animate-pulse rounded-base bg-secondary-background border-2 border-border",
-        className,
-      )}
-      {...props}
-    />
-  )
-}
+/**
+ * ⚡ Bolt: Skeleton component optimized with React.memo and forwardRef.
+ */
+const Skeleton = React.memo(
+  React.forwardRef<HTMLDivElement, SkeletonProps>(
+    ({ className, ...props }, ref) => (
+      <div
+        ref={ref}
+        data-slot="skeleton"
+        className={cn(
+          "animate-pulse rounded-base bg-secondary-background border-2 border-border",
+          className,
+        )}
+        {...props}
+      />
+    ),
+  ),
+)
 
 Skeleton.displayName = "Skeleton"
 

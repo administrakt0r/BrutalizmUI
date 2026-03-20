@@ -38,14 +38,14 @@ const users = [
   },
 ] as const
 
+// ⚡ Bolt: Create O(1) lookup map for users to prevent find on every value change
+const usersMap = Object.fromEntries(users.map((user) => [user.id, user]))
+
 export default function UserCombobox() {
   const [open, setOpen] = React.useState(false)
   const [value, setValue] = React.useState("1")
 
-  const selectedUser = React.useMemo(
-    () => users.find((user) => user.id === value),
-    [value],
-  )
+  const selectedUser = usersMap[value]
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

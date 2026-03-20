@@ -1,9 +1,10 @@
 "use client"
 
-import { memo, useCallback, useState } from "react"
+import * as React from "react"
 
 import STARS from "@/data/stars"
 
+import { LazyRender } from "@/components/app/lazy-render"
 import {
   Select,
   SelectContent,
@@ -15,24 +16,24 @@ import {
 } from "@/components/ui/select"
 
 import CopyBtn from "./copy-btn"
-import ShadcnBtn from "./shadcn-btn"
+import ShadcnBtn, { PackageManagerContext } from "./shadcn-btn"
 
 export default function StarsGrid() {
-  const [command, setCommand] = useState(
+  const [command, setCommand] = React.useState(
     "pnpm dlx shadcn@latest add https://brutalizmui.pages.dev/r/",
   )
 
-  const handleChange = useCallback((pkg: string) => {
-    const command = "shadcn@latest add https://brutalizmui.pages.dev/r/"
+  const handleChange = React.useCallback((pkg: string) => {
+    const baseCommand = "shadcn@latest add https://brutalizmui.pages.dev/r/"
 
     if (pkg === "pnpm") {
-      setCommand("pnpm dlx " + command)
+      setCommand("pnpm dlx " + baseCommand)
     } else if (pkg === "npm") {
-      setCommand("npx " + command)
+      setCommand("npx " + baseCommand)
     } else if (pkg === "yarn") {
-      setCommand("yarn dlx " + command)
+      setCommand("yarn dlx " + baseCommand)
     } else {
-      setCommand("bunx --bun " + command)
+      setCommand("bunx --bun " + baseCommand)
     }
   }, [])
 
@@ -40,7 +41,10 @@ export default function StarsGrid() {
     <>
       <div className="mb-5 flex justify-end">
         <Select onValueChange={handleChange} defaultValue="pnpm">
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger
+            aria-label="Select package manager"
+            className="w-[150px]"
+          >
             <SelectValue placeholder="Pnpm" />
           </SelectTrigger>
           <SelectContent>
@@ -55,48 +59,49 @@ export default function StarsGrid() {
         </Select>
       </div>
 
-      {/* ⚡ Bolt: Removed redundant TooltipProvider as it is already provided in the root layout. */}
-      <div className="grid gap-5 xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 xl:gap-[50px]">
-        {STARS.map((star, i) => {
-          return (
-            <StarCard
-              key={star.id}
-              star={star}
-              index={i}
-              command={command + `s${i + 1}.json`}
-            />
-          )
-        })}
-      </div>
+      <PackageManagerContext.Provider value={command}>
+        <div className="grid gap-5 xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 xl:gap-[50px]">
+          {STARS.map((star, i) => {
+            return <StarCard key={star.id} star={star} index={i} />
+          })}
+        </div>
+      </PackageManagerContext.Provider>
     </>
   )
 }
 
-const StarCard = memo(
-  ({
-    star,
-    index,
-    command,
-  }: {
-    star: (typeof STARS)[0]
-    index: number
-    command: string
-  }) => {
-    return (
-      <div className="flex items-center gap-4 p-5 justify-center flex-col border-2 border-border bg-secondary-background rounded-base shadow-shadow">
-        <div className="xl:size-[200px] md:size-[160px] size-[120px]">
-          <star.componentExample />
-        </div>
+export type StarCardProps = React.ComponentPropsWithoutRef<"div"> & {
+  star: (typeof STARS)[0]
+  index: number
+}
 
-        <h4 className="font-heading">Star {index + 1}</h4>
+/**
+ * ⚡ Bolt: StarCard component optimized with React.memo and React.forwardRef.
+ */
+const StarCard = React.memo(
+  React.forwardRef<HTMLDivElement, StarCardProps>(
+    ({ star, index, ...props }, ref) => {
+      return (
+        <div
+          ref={ref}
+          data-slot="star-card"
+          className="flex items-center gap-4 p-5 justify-center flex-col border-2 border-border bg-secondary-background rounded-base shadow-shadow"
+          {...props}
+        >
+          <LazyRender className="xl:size-[200px] md:size-[160px] size-[120px]">
+            <star.componentExample />
+          </LazyRender>
 
-        <div className="flex items-center gap-2">
-          <ShadcnBtn command={command} />
-          <CopyBtn id={star.id} />
+          <h2 className="font-heading text-lg xl:text-2xl">Star {index + 1}</h2>
+
+          <div className="flex items-center gap-2">
+            <ShadcnBtn index={index} />
+            <CopyBtn id={star.id} name={`Star ${index + 1}`} />
+          </div>
         </div>
-      </div>
-    )
-  },
+      )
+    },
+  ),
 )
 
 StarCard.displayName = "StarCard"

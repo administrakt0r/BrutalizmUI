@@ -1,5 +1,5 @@
-import DataTableDemo from "@/components/ui/data-table"
+import { DataTableDemo as DataTable } from "@/components/ui/data-table"
 
-export default function DateTableDemo() {
-  return <DataTableDemo />
+export default function DataTableDemo() {
+  return <DataTable />
 }

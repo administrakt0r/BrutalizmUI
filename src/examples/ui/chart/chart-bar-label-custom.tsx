@@ -18,7 +18,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-export const description = "A bar chart with a custom label"
+const description = "A bar chart with a custom label"
 
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },

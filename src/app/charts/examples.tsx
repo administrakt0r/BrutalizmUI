@@ -1,5 +1,7 @@
 "use client"
 
+import { toast } from "sonner"
+
 import * as React from "react"
 
 import { ChartExample, charts } from "@/data/charts"
@@ -14,6 +16,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+
+import { sanitizeCSSVariable } from "@/lib/security"
 
 // ⚡ Bolt: Create a lookup map for charts by name to optimize lookups from O(n) to O(1).
 const chartsByName = Object.fromEntries(
@@ -190,50 +194,79 @@ export default function Examples() {
   )
 }
 
-const ChartComponent = ({
-  children,
-  chart,
-}: {
-  children: React.ReactNode
+export type ChartComponentProps = React.ComponentPropsWithoutRef<"div"> & {
   chart: ChartExample
-}) => {
-  const { name, slug } = chart
-  const [code, setCode] = React.useState<string | null>(null)
-  const [isOpen, setIsOpen] = React.useState(false)
-
-  React.useEffect(() => {
-    if (isOpen && !code) {
-      fetch(`/r/charts/${slug}.json`)
-        .then((res) => res.json())
-        .then((data) => {
-          setCode(data.files[0].content)
-        })
-        .catch((err) => {
-          console.error("Failed to fetch chart code:", err)
-          setCode("// Failed to load code.")
-        })
-    }
-  }, [isOpen, code, slug])
-
-  return (
-    <div>
-      <LazyRender className="min-h-[350px]">{children}</LazyRender>
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogTrigger asChild>
-          <Button className="mt-5 w-full">Copy</Button>
-        </DialogTrigger>
-        <DialogContent className="max-w-full">
-          <DialogHeader>
-            <DialogTitle>{name}</DialogTitle>
-          </DialogHeader>
-          <Pre
-            wrapperClassName="w-full max-w-full text-white overflow-x-auto"
-            __rawstring__={code || ""}
-          >
-            {code || "Loading code..."}
-          </Pre>
-        </DialogContent>
-      </Dialog>
-    </div>
-  )
+  headingLevel?: "h2" | "h3"
 }
+
+/**
+ * ⚡ Bolt: ChartComponent optimized with React.memo and React.forwardRef.
+ * It fetches the chart code lazily when the dialog is opened.
+ */
+const ChartComponent = React.memo(
+  React.forwardRef<HTMLDivElement, ChartComponentProps>(
+    ({ children, chart, headingLevel = "h2", ...props }, ref) => {
+      const { name, slug } = chart
+      const Heading = headingLevel
+      const [code, setCode] = React.useState<string | null>(null)
+      const [isOpen, setIsOpen] = React.useState(false)
+
+      React.useEffect(() => {
+        const controller = new AbortController()
+
+        if (isOpen && !code) {
+          const sanitizedSlug = sanitizeCSSVariable(slug)
+          if (!sanitizedSlug) {
+            toast.error("Invalid chart identifier.")
+            setCode("// Invalid slug.")
+            return
+          }
+          fetch(`/r/charts/${sanitizedSlug}.json`, {
+            signal: controller.signal,
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              setCode(data.files[0].content)
+            })
+            .catch((err) => {
+              if (err.name === "AbortError") return
+              toast.error("Failed to fetch chart code.")
+              setCode("// Failed to load code.")
+            })
+        }
+
+        return () => controller.abort()
+      }, [isOpen, code, slug])
+
+      return (
+        <div ref={ref} data-slot="chart-component" {...props}>
+          <Heading className="sr-only">{name}</Heading>
+          <LazyRender className="min-h-[350px]">{children}</LazyRender>
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+              <Button
+                className="mt-5 w-full"
+                aria-label={`Copy code for ${name}`}
+              >
+                Copy
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-full">
+              <DialogHeader>
+                <DialogTitle>{name}</DialogTitle>
+              </DialogHeader>
+              <Pre
+                wrapperClassName="w-full max-w-full text-white overflow-x-auto"
+                __rawstring__={code || ""}
+              >
+                {code || "Loading code..."}
+              </Pre>
+            </DialogContent>
+          </Dialog>
+        </div>
+      )
+    },
+  ),
+)
+
+ChartComponent.displayName = "ChartComponent"

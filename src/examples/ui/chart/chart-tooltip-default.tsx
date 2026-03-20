@@ -16,9 +16,9 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-export const description = "A stacked bar chart with a legend"
-export const iframeHeight = "600px"
-export const containerClassName =
+const description = "A stacked bar chart with a legend"
+const iframeHeight = "600px"
+const containerClassName =
   "[&>div]:w-full [&>div]:max-w-md flex items-center justify-center min-h-svh"
 
 const chartData = [
@@ -41,6 +41,19 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
+// ⚡ Bolt: Extract Intl.DateTimeFormat instantiation outside of the render loop
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  weekday: "short",
+})
+
+// ⚡ Bolt: Pre-format dates into a map to avoid expensive instantiations and formatting inside the render loop
+const formattedDates = Object.fromEntries(
+  chartData.map((item) => [
+    item.date,
+    dateFormatter.format(new Date(item.date)),
+  ]),
+)
+
 export default function ChartTooltipDefault() {
   return (
     <Card className="bg-secondary-background text-foreground">
@@ -59,9 +72,7 @@ export default function ChartTooltipDefault() {
               tickMargin={10}
               axisLine={false}
               tickFormatter={(value) => {
-                return new Date(value).toLocaleDateString("en-US", {
-                  weekday: "short",
-                })
+                return formattedDates[value as string] || value
               }}
             />
             <Bar

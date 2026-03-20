@@ -20,7 +20,7 @@ import {
 
 import { cn } from "@/lib/utils"
 
-export const description = "An interactive line chart"
+const description = "An interactive line chart"
 
 const chartData = [
   { date: "2024-04-01", desktop: 222, mobile: 150 },
@@ -130,17 +130,62 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
+// ⚡ Bolt: Extract Intl.NumberFormat instantiation outside of the render loop
+const numberFormatter = new Intl.NumberFormat("en-US")
+
+// ⚡ Bolt: Extract Intl.DateTimeFormat instantiation outside of the render loop
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+})
+
+const tooltipDateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+})
+
+// ⚡ Bolt: Pre-format dates into a map to avoid expensive instantiations and formatting inside the render loop
+const formattedDates = Object.fromEntries(
+  chartData.map((item) => [
+    item.date,
+    dateFormatter.format(new Date(item.date)),
+  ]),
+)
+
+const formattedTooltipDates = Object.fromEntries(
+  chartData.map((item) => [
+    item.date,
+    tooltipDateFormatter.format(new Date(item.date)),
+  ]),
+)
+
+/**
+ * @description
+ * Pre-computes the total desktop and mobile views from the static `chartData` array.
+ * This O(N) operation is extracted outside the React render loop to avoid unnecessary
+ * computation and object instantiation during re-renders, adhering to performance best practices.
+ * ⚡ Bolt: Uses a single `.reduce()` pass to compute totals, eliminating the need to iterate
+ * over the array multiple times.
+ */
+const total = chartData.reduce(
+  (acc, curr) => {
+    acc.desktop += curr.desktop
+    acc.mobile += curr.mobile
+    return acc
+  },
+  { desktop: 0, mobile: 0 }
+)
+
+// ⚡ Bolt: Pre-format total views outside the component to avoid calling .format() during every render
+const formattedTotal = {
+  desktop: numberFormatter.format(total.desktop),
+  mobile: numberFormatter.format(total.mobile),
+}
+
 export default function ChartLineInteractive() {
   const [activeChart, setActiveChart] =
     React.useState<keyof typeof chartConfig>("desktop")
-
-  const total = React.useMemo(
-    () => ({
-      desktop: chartData.reduce((acc, curr) => acc + curr.desktop, 0),
-      mobile: chartData.reduce((acc, curr) => acc + curr.mobile, 0),
-    }),
-    [],
-  )
 
   return (
     <Card className="bg-secondary-background py-0 text-foreground">
@@ -163,7 +208,7 @@ export default function ChartLineInteractive() {
               >
                 <span className="text-xs">{chartConfig[chart].label}</span>
                 <span className="text-lg leading-none font-heading sm:text-3xl">
-                  {total[key as keyof typeof total].toLocaleString()}
+                  {formattedTotal[key as keyof typeof formattedTotal]}
                 </span>
               </button>
             )
@@ -197,11 +242,7 @@ export default function ChartLineInteractive() {
               tickMargin={8}
               minTickGap={32}
               tickFormatter={(value) => {
-                const date = new Date(value)
-                return date.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                })
+                return formattedDates[value as string] || value
               }}
             />
             <ChartTooltip
@@ -210,11 +251,7 @@ export default function ChartLineInteractive() {
                   className="w-[150px]"
                   nameKey="views"
                   labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })
+                    return formattedTooltipDates[value as string] || value
                   }}
                 />
               }

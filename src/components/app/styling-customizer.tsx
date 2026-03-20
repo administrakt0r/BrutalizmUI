@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckCircle2Icon } from "lucide-react"
+import { Check, CheckCircle2Icon } from "lucide-react"
 
 import * as React from "react"
 
@@ -13,6 +13,8 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+
+import { cn } from "@/lib/utils"
 import {
   Select,
   SelectContent,
@@ -30,7 +32,6 @@ const previewStyling = [
     bg: "bg-[#FFF1DC] dark:bg-[#2E1D14]",
     rounded: "rounded-[5px]!",
     shadow: "shadow-[4px_4px_0_0_rgba(0,0,0,1)]!",
-    boxShadow: "4px 4px 0 0 rgba(0,0,0,1)",
   },
   {
     name: "green",
@@ -38,7 +39,6 @@ const previewStyling = [
     bg: "bg-[#DEFCE9] dark:bg-[#0E2016]",
     rounded: "rounded-[15px]!",
     shadow: "shadow-[0_4px_0_0_rgba(0,0,0,1)]!",
-    boxShadow: "0 4px 0 0 rgba(0,0,0,1)",
   },
   {
     name: "orange",
@@ -46,7 +46,6 @@ const previewStyling = [
     bg: "bg-[#FFEDD6] dark:bg-[#322215]",
     rounded: "rounded-[10px]!",
     shadow: "shadow-[-4px_-4px_0_0_rgba(0,0,0,1)]!",
-    boxShadow: "-4px -4px 0 0 rgba(0,0,0,1)",
   },
   {
     name: "violet",
@@ -54,7 +53,6 @@ const previewStyling = [
     bg: "bg-[#EEE6FE] dark:bg-[#332352]",
     rounded: "rounded-none!",
     shadow: "shadow-[4px_-4px_0_0_rgba(0,0,0,1)]!",
-    boxShadow: "4px -4px 0 0 rgba(0,0,0,1)",
   },
   {
     name: "coral",
@@ -62,7 +60,6 @@ const previewStyling = [
     bg: "bg-[#FFE7DF] dark:bg-[#2F1E1A]",
     rounded: "rounded-[8px]!",
     shadow: "shadow-[4px_0_0_0_rgba(0,0,0,1)]!",
-    boxShadow: "4px 0 0 0 rgba(0,0,0,1)",
   },
   {
     name: "forest",
@@ -70,62 +67,82 @@ const previewStyling = [
     bg: "bg-[#E6F9ED] dark:bg-[#14251A]",
     rounded: "rounded-[12px]!",
     shadow: "shadow-[0_4px_0_0_rgba(0,0,0,1)]!",
-    boxShadow: "0 4px 0 0 rgba(0,0,0,1)",
   },
 ]
 
-type StylingItem = (typeof previewStyling)[number]
+export type StylingItem = (typeof previewStyling)[number]
+
+export type StylingButtonProps = {
+  color: StylingItem
+  isActive: boolean
+  onClick: (item: StylingItem) => void
+  className?: string
+}
 
 const StylingButton = React.memo(
-  ({
-    color,
-    onClick,
-  }: {
-    color: StylingItem
-    onClick: (item: StylingItem) => void
-  }) => {
-    return (
-      <Button
-        className={`h-full border-2 border-border md:text-xl sm:text-sm text-xs sm:px-4 px-2 ${color.main}`}
-        onClick={() => onClick(color)}
-      >
-        try {color.name}
-      </Button>
-    )
-  },
+  React.forwardRef<HTMLButtonElement, StylingButtonProps>(
+    ({ color, isActive, onClick, className, ...props }, ref) => {
+      return (
+        <Button
+          ref={ref}
+          data-slot="styling-button"
+          className={cn(
+            "h-full border-2 border-border md:text-xl sm:text-sm text-xs sm:px-4 px-2",
+            color.main,
+            className,
+          )}
+          onClick={() => onClick(color)}
+          aria-pressed={isActive}
+          aria-label={`Apply ${color.name} theme`}
+          {...props}
+        >
+          {isActive ? (
+            <Check className="size-4 mr-1" aria-hidden="true" />
+          ) : (
+            "try "
+          )}
+          {color.name}
+        </Button>
+      )
+    },
+  ),
 )
 
 StylingButton.displayName = "StylingButton"
 
-export default function StylingCustomizer() {
-  const [{ main, bg, rounded, boxShadow }, setStyling] = React.useState(
-    previewStyling[0],
-  )
+/**
+ * ⚡ Bolt: StylingCustomizer component optimized with React.memo.
+ */
+const StylingCustomizer = React.memo(() => {
+  const [currentStyling, setStyling] = React.useState(previewStyling[0])
+
+  const { main, bg, rounded, shadow } = currentStyling
 
   const handleSetStyling = React.useCallback((styling: StylingItem) => {
     setStyling(styling)
   }, [])
 
   return (
-    <div className="mx-auto max-w-[800px] w-full mt-20 sm:px-5 px-0">
+    <div
+      data-slot="styling-customizer"
+      className="mx-auto max-w-[800px] w-full mt-20 sm:px-5 px-0"
+    >
       <div className="grid md:gap-10 gap-5">
         <div className="grid md:grid-cols-4 sm:grid-cols-2 grid-cols-2 gap-4 sm:w-full w-2/3 mx-auto">
           {previewStyling.map((color) => (
             <StylingButton
               key={color.name}
               color={color}
+              isActive={currentStyling.name === color.name}
               onClick={handleSetStyling}
             />
           ))}
         </div>
         <div
-          className={`${bg} sm:border-x-2 border-x-0 border-y-2 sm:shadow-shadow shadow-none flex flex-col justify-between sm:p-8 p-4 border-border h-[350px] bg-[linear-gradient(to_right,#80808033_1px,transparent_1px),linear-gradient(to_bottom,#80808033_1px,transparent_1px)] bg-[size:30px_30px] ${bg}`}
+          className={`${bg} sm:border-x-2 border-x-0 border-y-2 sm:shadow-shadow shadow-none flex flex-col justify-between sm:p-8 p-4 border-border h-[350px] bg-[linear-gradient(to_right,#80808033_1px,transparent_1px),linear-gradient(to_bottom,#80808033_1px,transparent_1px)] bg-[size:30px_30px]`}
         >
           <Alert
-            style={{
-              boxShadow,
-            }}
-            className={`${main} ${rounded} transition-all duration-200`}
+            className={`${main} ${rounded} ${shadow} transition-all duration-200`}
           >
             <CheckCircle2Icon />
             <AlertTitle>Success! Your changes have been saved</AlertTitle>
@@ -136,10 +153,7 @@ export default function StylingCustomizer() {
 
           <Accordion type="single" defaultValue="item-1">
             <AccordionItem
-              style={{
-                boxShadow,
-              }}
-              className={`${rounded} transition-all duration-200`}
+              className={`${rounded} ${shadow} transition-all duration-200`}
               value="item-1"
             >
               <AccordionTrigger className={`${main}`}>
@@ -153,10 +167,7 @@ export default function StylingCustomizer() {
 
           <div className="flex items-center justify-between gap-2">
             <Button
-              style={{
-                boxShadow,
-              }}
-              className={`${main} ${rounded} transition-all duration-200 pointer-events-none`}
+              className={`${main} ${rounded} ${shadow} transition-all duration-200 pointer-events-none`}
               size="sm"
             >
               Button
@@ -177,6 +188,7 @@ export default function StylingCustomizer() {
             <div className="hidden sm:block">
               <Select>
                 <SelectTrigger
+                  aria-label="Select a fruit"
                   className={`${main} ${rounded} w-[180px] transition-all duration-200`}
                 >
                   <SelectValue placeholder="Select a fruit" />
@@ -207,4 +219,8 @@ export default function StylingCustomizer() {
       </div>
     </div>
   )
-}
+})
+
+StylingCustomizer.displayName = "StylingCustomizer"
+
+export default StylingCustomizer

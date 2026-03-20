@@ -6,21 +6,31 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-interface LabelProps extends React.ComponentProps<typeof LabelPrimitive.Root> {}
+export type LabelProps = React.ComponentPropsWithoutRef<
+  typeof LabelPrimitive.Root
+>
 
-function Label({ className, ...props }: LabelProps) {
-  return (
-    <LabelPrimitive.Root
-      data-slot="label"
-      className={cn(
-        "text-sm font-heading leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
-        className,
-      )}
-      {...props}
-    />
-  )
-}
+/**
+ * ⚡ Bolt: Label component optimized with React.memo and React.forwardRef.
+ */
+const Label = React.memo(
+  React.forwardRef<React.ElementRef<typeof LabelPrimitive.Root>, LabelProps>(
+    ({ className, ...props }, ref) => {
+      return (
+        <LabelPrimitive.Root
+          ref={ref}
+          data-slot="label"
+          className={cn(
+            "text-sm font-heading leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+            className,
+          )}
+          {...props}
+        />
+      )
+    },
+  ),
+)
 
 Label.displayName = "Label"
 
-export { Label, type LabelProps }
+export { Label }

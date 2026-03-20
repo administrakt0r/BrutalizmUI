@@ -129,7 +129,7 @@ function ListItem({
   title,
   children,
   ...props
-}: React.ComponentProps<"a">) {
+}: React.ComponentPropsWithoutRef<"a">) {
   return (
     <li>
       <NavigationMenuLink asChild>

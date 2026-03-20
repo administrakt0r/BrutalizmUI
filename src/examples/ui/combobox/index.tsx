@@ -44,6 +44,11 @@ const frameworks = [
   },
 ]
 
+// ⚡ Bolt: Use O(1) lookup map instead of O(n) array.find() in render loops
+const frameworksMap = Object.fromEntries(
+  frameworks.map((f) => [f.value, f.label]),
+)
+
 export default function FrameworkCombobox() {
   const [open, setOpen] = React.useState(false)
   const [value, setValue] = React.useState("")
@@ -57,9 +62,7 @@ export default function FrameworkCombobox() {
           aria-expanded={open}
           className="w-full justify-between md:max-w-[200px]"
         >
-          {value
-            ? frameworks.find((framework) => framework.value === value)?.label
-            : "Select framework..."}
+          {value ? frameworksMap[value] : "Select framework..."}
           <ChevronsUpDown />
         </Button>
       </PopoverTrigger>

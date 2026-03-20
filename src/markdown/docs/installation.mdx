@@ -1,32 +1,34 @@
 ---
-title: Installation
-description: Learn how to install BrutalizmUI.
+title: Installing BrutalizmUI in Your React Project
+description: A step-by-step guide to setting up and installing BrutalizmUI neobrutalism components.
 ---
 
-## 1. Initialize shadcn
+Installing BrutalizmUI is a straightforward process that integrates seamlessly with your existing Shadcn/ui and Tailwind CSS 4 setup. You can add components programmatically using the Shadcn CLI or manually by copying the source code into your project.
 
-As explained in introduction, most of these components are based on <a target="_blank" href="https://ui.shadcn.com/">Shadcn UI</a>. 
+## 1. Initialize shadcn/ui
 
-Visit <a href='https://ui.shadcn.com/docs/cli#init' target='_blank'>shadcn docs</a> to see how to initialize shadcn.
+As explained in the introduction, most of these components are based on <a rel="noopener noreferrer" target="_blank" href="https://ui.shadcn.com/">Shadcn UI</a>.
+
+Visit <a rel="noopener noreferrer" href='https://ui.shadcn.com/docs/cli#init' target='_blank'>shadcn docs</a> to see how to initialize shadcn.
 
 <Warning className="mt-8 mb-4" description="BrutalizmUI doesn't support utility class components anymore, only css variables components. Also, it doesn't matter which baseColor you choose, because it doesn't change the styling." />
 
-## 2. Add styling
+## 2. Configure Global Styling
 
-Delete the existing styling from your `globals.css` and paste <Link target='_blank' href='/styling'>desired styling</Link>.
+Delete the existing styling from your `globals.css` and paste <Link target='_blank' href='/styling'>desired styling</Link>. This ensures your project adopts the core neobrutalism CSS variables and base styles.
 
-## 3. Install components
+## 3. Deploy Components
 
-### Install via Shadcn cli
+### Installation via Shadcn CLI
 
 Just choose desired component variant and desired package manager, copy cli command to your terminal and you're good to go. 
 If there is no shadcn cli command on the component page you'll have to install the component manually.
 
-### Install manually
+### Manual Component Installation
 
 In the docs below each component's name you'll have the shadcn docs link for that component.
 
-e.g. You want to install shadcn button component. You'll navigate to <a target='_blank' href='/components/button'>button page</a>, click on the shadcn docs
+e.g. You want to install shadcn button component. You'll navigate to <a rel="noopener noreferrer" target='_blank' href='/components/button'>button page</a>, click on the shadcn docs
 link and install the button component like it's shown in the docs.
 
 After you're done you'll come back to the BrutalizmUI button page, and copy button component to your project inside `components/ui/button.tsx`

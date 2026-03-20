@@ -1,5 +1,7 @@
 import AlertDemo from "@/examples/ui/alert"
 
+import dynamic from "next/dynamic"
+
 import { LazyRender } from "@/components/app/lazy-render"
 import { Button } from "@/components/ui/button"
 import {
@@ -13,22 +15,27 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-import AccordionDemo from "./demos/accordion"
-import CardDemo2 from "./demos/card-2"
-import CardDemo3 from "./demos/card-3"
-import CarouselDemo from "./demos/carousel"
-import CollapsibleDemo from "./demos/collapsible"
-import CommandDemo from "./demos/command"
-import ImageCardDemo from "./demos/image-card"
-import ResizableDemo from "./demos/resizable"
-import ScrollAreaDemo from "./demos/scroll-area"
+// ⚡ Bolt: Convert all heavy demo components to dynamic imports to improve First Load JS.
+const AccordionDemo = dynamic(() => import("./demos/accordion"))
+const CardDemo2 = dynamic(() => import("./demos/card-2"))
+const CardDemo3 = dynamic(() => import("./demos/card-3"))
+const CarouselDemo = dynamic(() => import("./demos/carousel"))
+const CollapsibleDemo = dynamic(() => import("./demos/collapsible"))
+const CommandDemo = dynamic(() => import("./demos/command"))
+const ImageCardDemo = dynamic(() => import("./demos/image-card"))
+const ResizableDemo = dynamic(() => import("./demos/resizable"))
+const ScrollAreaDemo = dynamic(() => import("./demos/scroll-area"))
 
 export default function ExampleComponents() {
   return (
     <div className="w-full grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 mt-10 gap-5 not-prose">
       <div className="flex flex-col gap-5">
-        <CollapsibleDemo />
-        <AccordionDemo />
+        <LazyRender className="min-h-[100px]">
+          <CollapsibleDemo />
+        </LazyRender>
+        <LazyRender className="min-h-[200px]">
+          <AccordionDemo />
+        </LazyRender>
         <LazyRender className="min-h-[200px]">
           <CarouselDemo />
         </LazyRender>

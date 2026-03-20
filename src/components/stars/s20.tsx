@@ -1,32 +1,48 @@
-/**
- * @preview ![img](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAglJREFUSEuNVc16gyAQHG/VvFaOgk9UU+0TCR7tY1V7Kv0WFl0Ek+YSRdifmZ2hcs458I8eqviy//Oq/Jg9OzhUqORWfq6yBP5DIVoh+7F0/TFJcBSfHohvTdOAnrd19VvLTXE3HCwkKGOTRgBACei3fq8lLFNQSxDFHeM44r3vdz5kBz4BdyDpojN932cMZhDRxsfjAaUUjDEJEMUOHKA7jdlafAxDlqT6dc4lnALQWsHaWSQJhaUJQl9aa1hr0SoF6wtKkRUdpOPoD84WqlWYjPGD1dxSkmNw6tbvkePO05hPkSBcBjCT8QkiybrjLlsFY0PlpWERU1RQCeNLEFAny9fi49zvdw+L5MkLTVIcp+jg4EqqxEmAiyqkILTzCC6Kz0RKmmWriATGNs/pfn42wHH4Cqjf6mwk5UIcZZGADuROFIHdti0JWNd1DrmoKktQZIhDRrJlBqVaTMYWS5L7XlpFFBHN+bIUSJ7MyRxT5P4/psYcQlvXXWCR7CurD0rmIZaerrTGzEILliGU7L3IQevuNK5CDM/MbhcYi6hsdsGWO8WK373rCUQU6FOa3Qnf830Q1Us8kfAGaXaXNxqAcSRXfEhn2SGSF46sdaDCntt14RY7Mdc0QSv5fZDKUtrGxZ3MqjjZU3MjcVXYXtxouQ4yk0ojXxnZlYPK9byDq2QFpywnSO+VP1TFncapthQ8AAAAAElFTkSuQmCC)
- */
-export default function Star20({
-  color,
-  size,
-  stroke,
-  strokeWidth,
-  pathClassName,
-  width,
-  height,
-  ...props
-}: React.SVGProps<SVGSVGElement> & {
+import * as React from "react"
+
+import { cn } from "@/lib/utils"
+
+export type Star20Props = React.ComponentPropsWithoutRef<"svg"> & {
   color?: string
   size?: number
   stroke?: string
   pathClassName?: string
   strokeWidth?: number
-}) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 200 200"
-      width={size ?? width}
-      height={size ?? height}
-      {...props}
-    >
-      <path
+}
+
+/**
+ * ⚡ Bolt: Star20 component optimized with React.memo and React.forwardRef.
+ * @preview ![img](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAglJREFUSEuNVc16gyAQHG/VvFaOgk9UU+0TCR7tY1V7Kv0WFl0Ek+YSRdifmZ2hcs458I8eqviy//Oq/Jg9OzhUqORWfq6yBP5DIVoh+7F0/TFJcBSfHohvTdOAnrd19VvLTXE3HCwkKGOTRgBACei3fq8lLFNQSxDFHeM44r3vdz5kBz4BdyDpojN932cMZhDRxsfjAaUUjDEJEMUOHKA7jdlafAxDlqT6dc4lnALQWsHaWSQJhaUJQl9aa1hr0SoF6wtKkRUdpOPoD84WqlWYjPGD1dxSkmNw6tbvkePO05hPkSBcBjCT8QkiybrjLlsFY0PlpWERU1RQCeNLEFAny9fi49zvdw+L5MkLTVIcp+jg4EqqxEmAiyqkILTzCC6Kz0RKmmWriATGNs/pfn42wHH4Cqjf6mwk5UIcZZGADuROFIHdti0JWNd1DrmoKktQZIhDRrJlBqVaTMYWS5L7XlpFFBHN+bIUSJ7MyRxT5P4/psYcQlvXXWCR7CurD0rmIZaerrTGzEILliGU7L3IQevuNK5CDM/MbhcYi6hsdsGWO8WK373rCUQU6FOa3Qnf830Q1Us8kfAGaXaXNxqAcSRXfEhn2SGSF46sdaDCntt14RY7Mdc0QSv5fZDKUtrGxZ3MqjjZU3MjcVXYXtxouQ4yk0ojXxnZlYPK9byDq2QFpywnSO+VP1TFncapthQ8AAAAAElFTkSuQmCC)
+ */
+const Star20 = React.memo(
+  React.forwardRef<SVGSVGElement, Star20Props>(
+    (
+      {
+        color,
+        size,
+        stroke,
+        strokeWidth,
+        pathClassName,
+        width,
+        height,
+        className,
+        ...props
+      },
+      ref,
+    ) => {
+      return (
+        <svg
+          ref={ref}
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 200 200"
+          width={size ?? width}
+          height={size ?? height}
+          data-slot="star-s20"
+          className={cn(className)}
+          {...props}
+        >
+          <path
         fill={color ?? "currentColor"}
         stroke={stroke}
         strokeWidth={strokeWidth}
@@ -35,6 +51,12 @@ export default function Star20({
         clipRule="evenodd"
         fillRule="evenodd"
       />
-    </svg>
-  )
-}
+        </svg>
+      )
+    },
+  ),
+)
+
+Star20.displayName = "Star20"
+
+export default Star20

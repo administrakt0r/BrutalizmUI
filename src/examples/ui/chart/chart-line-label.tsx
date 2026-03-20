@@ -18,7 +18,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-export const description = "A line chart with a label"
+const description = "A line chart with a label"
 
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },

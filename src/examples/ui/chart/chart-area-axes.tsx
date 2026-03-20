@@ -18,7 +18,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-export const description = "An area chart with axes"
+const description = "An area chart with axes"
 
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },
@@ -39,6 +39,12 @@ const chartConfig = {
     color: "var(--chart-2)",
   },
 } satisfies ChartConfig
+
+// ⚡ Bolt: Pre-compute the sliced month names into a static lookup map
+// to avoid repetitive string manipulation during the render cycle.
+const monthTickFormatter = Object.fromEntries(
+  chartData.map((item) => [item.month, item.month.slice(0, 3)]),
+)
 
 export default function ChartAreaAxes() {
   return (
@@ -65,7 +71,7 @@ export default function ChartAreaAxes() {
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => value.slice(0, 3)}
+              tickFormatter={(value) => monthTickFormatter[value] || value}
             />
             <YAxis
               tickLine={false}

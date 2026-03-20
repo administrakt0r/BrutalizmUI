@@ -77,7 +77,7 @@ function generateChartsData() {
       chartsTsContent += `)\n`
     })
 
-    chartsTsContent += `\nexport interface ChartExample {\n`
+    chartsTsContent += `\nexport type ChartExample = {\n`
     chartsTsContent += `  component: React.ComponentType\n`
     chartsTsContent += `  name: string\n`
     chartsTsContent += `  slug: string\n`

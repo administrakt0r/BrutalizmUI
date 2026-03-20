@@ -434,12 +434,9 @@ const COMPONENTS: Component[] = [
   },
 ]
 
-export const COMPONENTS_MAP = COMPONENTS.reduce(
-  (acc, component) => {
-    acc[transformToSlug(component.name)] = component
-    return acc
-  },
-  {} as Record<string, Component>,
-)
+// ⚡ Bolt: Use Object.fromEntries for O(N) object transformation instead of .reduce
+export const COMPONENTS_MAP = Object.fromEntries(
+  COMPONENTS.map((component) => [transformToSlug(component.name), component]),
+) as Record<string, Component>
 
 export default COMPONENTS

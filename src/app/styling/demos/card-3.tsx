@@ -43,6 +43,7 @@ export default function CardDemo3() {
               </Label>
               <Select>
                 <SelectTrigger
+                  aria-label="Select framework"
                   className="bg-secondary-background text-foreground"
                   id="framework"
                 >

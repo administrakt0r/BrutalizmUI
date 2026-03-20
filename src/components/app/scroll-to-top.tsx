@@ -1,12 +1,20 @@
 "use client"
 
-import { useEffect } from "react"
+import * as React from "react"
 import { usePathname } from "next/navigation"
 
-export default function Scroll() {
+/**
+ * ⚡ Bolt: ScrollToTop component optimized with React.memo.
+ * It ensures the page scrolls to the top on every route transition.
+ */
+export const ScrollToTop = React.memo(() => {
   const pathname = usePathname()
-  useEffect(() => {
+
+  React.useEffect(() => {
     window.scroll(0, 0)
   }, [pathname])
+
   return null
-}
+})
+
+ScrollToTop.displayName = "ScrollToTop"

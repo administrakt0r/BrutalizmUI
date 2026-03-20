@@ -6,50 +6,72 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-type TooltipProviderProps = React.ComponentProps<
+export type TooltipProviderProps = React.ComponentPropsWithoutRef<
   typeof TooltipPrimitive.Provider
 >
 
-function TooltipProvider({
-  delayDuration = 0,
-  ...props
-}: TooltipProviderProps) {
-  return (
+/**
+ * ⚡ Bolt: TooltipProvider component optimized with React.memo.
+ */
+const TooltipProvider = React.memo(
+  ({ delayDuration = 0, ...props }: TooltipProviderProps) => (
     <TooltipPrimitive.Provider
       data-slot="tooltip-provider"
       delayDuration={delayDuration}
       {...props}
     />
-  )
-}
+  ),
+)
 
 TooltipProvider.displayName = "TooltipProvider"
 
-type TooltipProps = React.ComponentProps<typeof TooltipPrimitive.Root>
+export type TooltipProps = React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Root>
 
-function Tooltip({ ...props }: TooltipProps) {
-  return <TooltipPrimitive.Root data-slot="tooltip" {...props} />
-}
+/**
+ * ⚡ Bolt: Tooltip component optimized with React.memo.
+ */
+const Tooltip = React.memo(({ ...props }: TooltipProps) => (
+  <TooltipPrimitive.Root data-slot="tooltip" {...props} />
+))
 
 Tooltip.displayName = "Tooltip"
 
-type TooltipTriggerProps = React.ComponentProps<typeof TooltipPrimitive.Trigger>
+export type TooltipTriggerProps = React.ComponentPropsWithoutRef<
+  typeof TooltipPrimitive.Trigger
+>
 
-function TooltipTrigger({ ...props }: TooltipTriggerProps) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />
-}
+/**
+ * ⚡ Bolt: TooltipTrigger component optimized with React.memo.
+ */
+const TooltipTrigger = React.memo(
+  React.forwardRef<
+    React.ElementRef<typeof TooltipPrimitive.Trigger>,
+    TooltipTriggerProps
+  >(({ ...props }, ref) => (
+    <TooltipPrimitive.Trigger
+      ref={ref}
+      data-slot="tooltip-trigger"
+      {...props}
+    />
+  )),
+)
 
 TooltipTrigger.displayName = "TooltipTrigger"
 
-type TooltipContentProps = React.ComponentProps<typeof TooltipPrimitive.Content>
+export type TooltipContentProps = React.ComponentPropsWithoutRef<
+  typeof TooltipPrimitive.Content
+>
 
-function TooltipContent({
-  className,
-  sideOffset = 4,
-  ...props
-}: TooltipContentProps) {
-  return (
+/**
+ * ⚡ Bolt: TooltipContent component optimized with React.memo.
+ */
+const TooltipContent = React.memo(
+  React.forwardRef<
+    React.ElementRef<typeof TooltipPrimitive.Content>,
+    TooltipContentProps
+  >(({ className, sideOffset = 4, ...props }, ref) => (
     <TooltipPrimitive.Content
+      ref={ref}
       data-slot="tooltip-content"
       sideOffset={sideOffset}
       className={cn(
@@ -58,18 +80,9 @@ function TooltipContent({
       )}
       {...props}
     />
-  )
-}
+  )),
+)
 
 TooltipContent.displayName = "TooltipContent"
 
-export {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-  TooltipProvider,
-  type TooltipProps,
-  type TooltipTriggerProps,
-  type TooltipContentProps,
-  type TooltipProviderProps,
-}
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }

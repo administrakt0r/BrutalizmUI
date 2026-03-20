@@ -144,7 +144,7 @@ const ChartTooltipLabelNone = dynamic(
   () => import("@/examples/ui/chart/chart-tooltip-label-none"),
 )
 
-export interface ChartExample {
+export type ChartExample = {
   component: React.ComponentType
   name: string
   slug: string

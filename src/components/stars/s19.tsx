@@ -1,32 +1,48 @@
-/**
- * @preview ![img](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAgNJREFUSEulVm12gyAQHHqWNNeIvUZ6k8YIi7E3aXKM2mtUe5XQB6wIERL7yp8oWXaY2S+FMcbAABCYflBeGUPecmfiZ3YiHMB/1t3LGYirMUY4o9jSkhLJ1qlt0TSNu8rpdMLh8OZp88oTMSgyiA+M44jn7bOXgNcwDNhsNsG9u1BGiYhB5iosLOkWSkkHYJ1YHCIKjO4pnDCYlUqjZZ0ppZyfCcC+N1IGGRcg7GIJsCBiQEpDaQWYyT0coJTyYcJ5gEV6pSEj0oHBREPJNQC5IMcZxffTiiAplUgqgpJNuXgSifhlGEdczmekpSHQ95/o+95FQMATrqoX7Kpdkjn23/3rPsmuEIOue0ddH4Kms9rzUxzksvgCrSbUx6NXcyo08eTzOFfWJbAY5PasVyGKgRBPnj5blsCSXC3QsGev3IE8AwBt1AqCFDGKe55jkJWL7V0reTu4oonqwGAYf3D5OHMY56r66nt8uiDPywa5qnbJ3t0gB8u057lbaCJIruS5DgjyYZre1EGp3uJWMV3kYSWz4Yp5YKBJBwYcCtcmbDU/6gJJDBZjjSmtZpAZCisYAFpbBr5dT4tIoWl4bxpW3N7jQVRo12mC2xayjQeOAIbveOCU6vrORLs90nUd6rp227rVONbHSP7y5F81MjPMb/B5hi8M/8AgyZbFRwLjZYj8AhkTWb5ydi0dAAAAAElFTkSuQmCC)
- */
-export default function Star19({
-  color,
-  size,
-  stroke,
-  strokeWidth,
-  pathClassName,
-  width,
-  height,
-  ...props
-}: React.SVGProps<SVGSVGElement> & {
+import * as React from "react"
+
+import { cn } from "@/lib/utils"
+
+export type Star19Props = React.ComponentPropsWithoutRef<"svg"> & {
   color?: string
   size?: number
   stroke?: string
   pathClassName?: string
   strokeWidth?: number
-}) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 200 200"
-      width={size ?? width}
-      height={size ?? height}
-      {...props}
-    >
-      <path
+}
+
+/**
+ * ⚡ Bolt: Star19 component optimized with React.memo and React.forwardRef.
+ * @preview ![img](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAgNJREFUSEulVm12gyAQHHqWNNeIvUZ6k8YIi7E3aXKM2mtUe5XQB6wIERL7yp8oWXaY2S+FMcbAABCYflBeGUPecmfiZ3YiHMB/1t3LGYirMUY4o9jSkhLJ1qlt0TSNu8rpdMLh8OZp88oTMSgyiA+M44jn7bOXgNcwDNhsNsG9u1BGiYhB5iosLOkWSkkHYJ1YHCIKjO4pnDCYlUqjZZ0ppZyfCcC+N1IGGRcg7GIJsCBiQEpDaQWYyT0coJTyYcJ5gEV6pSEj0oHBREPJNQC5IMcZxffTiiAplUgqgpJNuXgSifhlGEdczmekpSHQ95/o+95FQMATrqoX7Kpdkjn23/3rPsmuEIOue0ddH4Kms9rzUxzksvgCrSbUx6NXcyo08eTzOFfWJbAY5PasVyGKgRBPnj5blsCSXC3QsGev3IE8AwBt1AqCFDGKe55jkJWL7V0reTu4oonqwGAYf3D5OHMY56r66nt8uiDPywa5qnbJ3t0gB8u057lbaCJIruS5DgjyYZre1EGp3uJWMV3kYSWz4Yp5YKBJBwYcCtcmbDU/6gJJDBZjjSmtZpAZCisYAFpbBr5dT4tIoWl4bxpW3N7jQVRo12mC2xayjQeOAIbveOCU6vrORLs90nUd6rp227rVONbHSP7y5F81MjPMb/B5hi8M/8AgyZbFRwLjZYj8AhkTWb5ydi0dAAAAAElFTkSuQmCC)
+ */
+const Star19 = React.memo(
+  React.forwardRef<SVGSVGElement, Star19Props>(
+    (
+      {
+        color,
+        size,
+        stroke,
+        strokeWidth,
+        pathClassName,
+        width,
+        height,
+        className,
+        ...props
+      },
+      ref,
+    ) => {
+      return (
+        <svg
+          ref={ref}
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 200 200"
+          width={size ?? width}
+          height={size ?? height}
+          data-slot="star-s19"
+          className={cn(className)}
+          {...props}
+        >
+          <path
         fill={color ?? "currentColor"}
         stroke={stroke}
         strokeWidth={strokeWidth}
@@ -35,6 +51,12 @@ export default function Star19({
         clipRule="evenodd"
         fillRule="evenodd"
       />
-    </svg>
-  )
-}
+        </svg>
+      )
+    },
+  ),
+)
+
+Star19.displayName = "Star19"
+
+export default Star19

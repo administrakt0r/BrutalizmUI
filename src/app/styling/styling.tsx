@@ -1,10 +1,23 @@
 "use client"
 
-import { useCallback, useLayoutEffect, useMemo, useState } from "react"
+import { toast } from "sonner"
+
+import * as React from "react"
+import dynamic from "next/dynamic"
 
 import colors from "@/data/colors"
 
-import { Pre } from "@/components/app/pre"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -14,7 +27,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -34,10 +46,10 @@ import {
 } from "@/components/ui/sheet"
 
 import { sanitizeColor, sanitizeCSSVariable } from "@/lib/security"
-import { cn } from "@/lib/utils"
+import { cn, setCSSVariable } from "@/lib/utils"
 
 // ⚡ Bolt: Define the structure for color palette to ensure type safety.
-interface ColorPalette {
+export type ColorPalette = {
   name: string
   main: string
   darkMain: string
@@ -60,8 +72,151 @@ const colorsByName = Object.fromEntries(
   colors.map((color) => [color.name, color as ColorPalette]),
 )
 
+const LazyPre = dynamic(() =>
+  import("@/components/app/pre").then((mod) => mod.Pre),
+)
+
 const defaultColorPalette =
   colorsByName["sunset"] ?? (colors[0] as ColorPalette)
+
+// ⚡ Bolt: Hoist static property validation arrays for color palette.
+const ALLOWED_COLOR_KEYS = [
+  "name",
+  "main",
+  "darkMain",
+  "bg",
+  "darkBg",
+  "chart1",
+  "chart2",
+  "chart3",
+  "chart4",
+  "chart5",
+  "darkChart1",
+  "darkChart2",
+  "darkChart3",
+  "darkChart4",
+  "darkChart5",
+]
+const BLOCKED_PROTO_KEYS = [
+  "__proto__",
+  "constructor",
+  "prototype",
+  "__definegetter__",
+  "__definesetter__",
+  "__lookupgetter__",
+  "__lookupsetter__",
+]
+
+// ⚡ Bolt: Define module-level constants for localStorage keys.
+const STORAGE_KEY_COLOR = "color"
+const STORAGE_KEY_RADIUS = "borderRadius"
+const STORAGE_KEY_SHADOW = "boxShadow"
+const STORAGE_KEY_FONT_WEIGHT = "fontWeight"
+
+// ⚡ Bolt: Define static options outside the component to prevent re-creation.
+const BORDER_RADIUS_OPTIONS = [0, 5, 10, 15]
+const HORIZONTAL_BOX_SHADOW_OPTIONS = [-4, -2, 0, 2, 4]
+const VERTICAL_BOX_SHADOW_OPTIONS = [-4, -2, 0, 2, 4]
+const HEADING_FONT_WEIGHT_OPTIONS = [700, 800, 900]
+const BASE_FONT_WEIGHT_OPTIONS = [500, 600, 700]
+
+type SectionProps = {
+  label: string
+  id: string
+}
+
+/**
+ * ⚡ Bolt: Memoized sub-component for the Color selection section.
+ */
+const ColorSection = React.memo(
+  ({
+    value,
+    onValueChange,
+  }: {
+    value: string
+    onValueChange: (v: string) => void
+  }) => (
+    <div className="grid gap-3">
+      <Label htmlFor="color">Color</Label>
+      <Select value={value} onValueChange={onValueChange}>
+        <SelectTrigger
+          id="color"
+          className="bg-secondary-background text-foreground"
+        >
+          <SelectValue placeholder="Select a color" />
+        </SelectTrigger>
+        <SelectContent className="bg-secondary-background text-foreground">
+          {colors.map(({ name, main }) => (
+            <SelectItem key={name} value={name}>
+              <div className="flex items-center gap-2">
+                <div
+                  aria-hidden="true"
+                  className="size-4 rounded-full border-2 border-border"
+                  style={{ backgroundColor: main }}
+                />
+                {name}
+              </div>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  ),
+)
+ColorSection.displayName = "ColorSection"
+
+/**
+ * ⚡ Bolt: Generic memoized sub-component for button-based option sections.
+ */
+const OptionSection = React.memo(
+  ({
+    id,
+    label,
+    options,
+    currentValue,
+    onSelect,
+    unit = "",
+  }: SectionProps & {
+    options: number[]
+    currentValue: number
+    onSelect: (v: number) => void
+    unit?: string
+  }) => (
+    <div className="grid gap-3">
+      <Label htmlFor={id}>{label}</Label>
+      <div
+        id={id}
+        className={cn(
+          "grid gap-2",
+          options.length === 5
+            ? "grid-cols-5"
+            : options.length === 4
+              ? "grid-cols-4"
+              : "grid-cols-3",
+        )}
+      >
+        {options.map((option) => (
+          <Button
+            key={option}
+            onClick={() => onSelect(option)}
+            aria-pressed={currentValue === option}
+            className={cn(
+              "h-8",
+              currentValue === option
+                ? "bg-main text-main-foreground"
+                : "bg-secondary-background text-foreground",
+            )}
+            variant="noShadow"
+          >
+            {option}
+            {unit}
+          </Button>
+        ))}
+      </div>
+    </div>
+  ),
+)
+OptionSection.displayName = "OptionSection"
 
 export default function Styling() {
   const [
@@ -83,23 +238,44 @@ export default function Styling() {
       darkChart5,
     },
     setColor,
-  ] = useState<ColorPalette>(defaultColorPalette)
-  const [borderRadius, setBorderRadius] = useState(5)
-  const [boxShadowLength, setBoxShadowLength] = useState([4, 4])
-  const [fontWeight, setFontWeight] = useState([700, 500])
+  ] = React.useState<ColorPalette>(defaultColorPalette)
+  const [borderRadius, setBorderRadius] = React.useState(5)
+  // ⚡ Bolt: Decomposed state arrays to stabilize callbacks and reduce re-renders.
+  const [boxShadowX, setBoxShadowX] = React.useState(4)
+  const [boxShadowY, setBoxShadowY] = React.useState(4)
+  const [fontWeightHeading, setFontWeightHeading] = React.useState(700)
+  const [fontWeightBase, setFontWeightBase] = React.useState(500)
 
-  useLayoutEffect(() => {
-    // ⚡ Bolt: Wrapped localStorage JSON.parse in try-catch for runtime safety.
+  React.useLayoutEffect(() => {
     try {
-      const colorJson = localStorage.getItem("color")
-      const colorObj = colorJson ? JSON.parse(colorJson) : null
-      const borderRadius = Number(localStorage.getItem("borderRadius"))
-      const boxShadow = localStorage.getItem("boxShadow")?.split(",")
-      const fontWeight = localStorage.getItem("fontWeight")?.split(",")
+      const colorJson = localStorage.getItem(STORAGE_KEY_COLOR)
+      const colorObj =
+        colorJson && colorJson.length < 1000 ? JSON.parse(colorJson) : null
+      const borderRadiusStr = localStorage.getItem(STORAGE_KEY_RADIUS)
+      const borderRadiusVal =
+        borderRadiusStr !== null ? Number(borderRadiusStr) : null
+      const boxShadowStr = localStorage.getItem(STORAGE_KEY_SHADOW)
+      const boxShadow =
+        boxShadowStr && boxShadowStr.length < 100
+          ? boxShadowStr.split(",")
+          : null
+      const fontWeightStr = localStorage.getItem(STORAGE_KEY_FONT_WEIGHT)
+      const storedFontWeight =
+        fontWeightStr && fontWeightStr.length < 100
+          ? fontWeightStr.split(",")
+          : null
 
-      if (colorObj && typeof colorObj === "object") {
-        // Sanitize all color fields and keys before setting state
+      if (
+        colorObj &&
+        typeof colorObj === "object" &&
+        !Array.isArray(colorObj)
+      ) {
         const sanitizedEntries = Object.entries(colorObj)
+          .filter(
+            ([key]) =>
+              ALLOWED_COLOR_KEYS.includes(key) &&
+              !BLOCKED_PROTO_KEYS.includes(key.toLowerCase()),
+          )
           .map(([key, value]) => {
             const sanitizedKey = sanitizeCSSVariable(key)
             const sanitizedValue =
@@ -110,139 +286,165 @@ export default function Styling() {
 
         const sanitizedColorObj = Object.fromEntries(
           sanitizedEntries,
-        ) as unknown as ColorPalette
+        ) as unknown as Partial<ColorPalette>
 
-        // Ensure we have at least the required name property to consider it valid
         if (sanitizedColorObj.name) {
           setColor((prev) => ({ ...prev, ...sanitizedColorObj }))
         }
       }
 
-      if (borderRadius) {
-        setBorderRadius(borderRadius)
+      if (
+        borderRadiusVal !== null &&
+        Number.isFinite(borderRadiusVal) &&
+        borderRadiusVal >= 0 &&
+        borderRadiusVal <= 50
+      ) {
+        setBorderRadius(borderRadiusVal)
       }
 
-      if (boxShadow) {
-        setBoxShadowLength([+boxShadow[0], +boxShadow[1]])
+      if (
+        boxShadow &&
+        boxShadow.length === 2 &&
+        Number.isFinite(+boxShadow[0]) &&
+        Number.isFinite(+boxShadow[1]) &&
+        +boxShadow[0] >= -50 &&
+        +boxShadow[0] <= 50 &&
+        +boxShadow[1] >= -50 &&
+        +boxShadow[1] <= 50
+      ) {
+        setBoxShadowX(+boxShadow[0])
+        setBoxShadowY(+boxShadow[1])
       }
 
-      if (fontWeight) {
-        setFontWeight([+fontWeight[0], +fontWeight[1]])
+      if (
+        storedFontWeight &&
+        storedFontWeight.length === 2 &&
+        Number.isFinite(+storedFontWeight[0]) &&
+        Number.isFinite(+storedFontWeight[1]) &&
+        +storedFontWeight[0] >= 100 &&
+        +storedFontWeight[0] <= 1000 &&
+        +storedFontWeight[1] >= 100 &&
+        +storedFontWeight[1] <= 1000
+      ) {
+        setFontWeightHeading(+storedFontWeight[0])
+        setFontWeightBase(+storedFontWeight[1])
       }
     } catch (e) {
-      console.error("Failed to parse styling from localStorage", e)
+      toast.error("Failed to parse styling from localStorage.")
     }
   }, [])
 
-  // ⚡ Bolt: Memoized event handlers to prevent re-creation on every render.
-  const updateColor = useCallback((value: string) => {
-    const r = window.document.querySelector(":root") as HTMLElement
-    const color = colorsByName[value]!
+  const updateColor = React.useCallback(
+    (value: string) => {
+      if (value === name) return
 
-    setColor(color)
+      const color = colorsByName[value]!
+      setColor(color)
+      localStorage.setItem(STORAGE_KEY_COLOR, JSON.stringify(color))
 
-    localStorage.setItem("color", JSON.stringify(color))
+      const isDarkMode = document.documentElement.classList.contains("dark")
+      if (isDarkMode) {
+        setCSSVariable("background", color.darkBg)
+        setCSSVariable("main", color.darkMain)
+        setCSSVariable("chart-1", color.darkChart1)
+        setCSSVariable("chart-2", color.darkChart2)
+        setCSSVariable("chart-3", color.darkChart3)
+        setCSSVariable("chart-4", color.darkChart4)
+        setCSSVariable("chart-5", color.darkChart5)
+      } else {
+        setCSSVariable("background", color.bg)
+        setCSSVariable("main", color.main)
+        setCSSVariable("chart-1", color.chart1)
+        setCSSVariable("chart-2", color.chart2)
+        setCSSVariable("chart-3", color.chart3)
+        setCSSVariable("chart-4", color.chart4)
+        setCSSVariable("chart-5", color.chart5)
+      }
 
-    const isDarkMode = document.documentElement.classList.contains("dark")
+      setCSSVariable("dark-background", color.darkBg)
+      setCSSVariable("dark-main", color.darkMain)
+      setCSSVariable("light-background", color.bg)
+      setCSSVariable("light-main", color.main)
+    },
+    [name],
+  )
 
-    if (isDarkMode) {
-      r.style.setProperty("--background", color.darkBg)
-      r.style.setProperty("--main", color.darkMain)
-      r.style.setProperty("--chart-1", color.darkChart1)
-      r.style.setProperty("--chart-2", color.darkChart2)
-      r.style.setProperty("--chart-3", color.darkChart3)
-      r.style.setProperty("--chart-4", color.darkChart4)
-      r.style.setProperty("--chart-5", color.darkChart5)
-    } else {
-      r.style.setProperty("--background", color.bg)
-      r.style.setProperty("--main", color.main)
-      r.style.setProperty("--chart-1", color.chart1)
-      r.style.setProperty("--chart-2", color.chart2)
-      r.style.setProperty("--chart-3", color.chart3)
-      r.style.setProperty("--chart-4", color.chart4)
-      r.style.setProperty("--chart-5", color.chart5)
-    }
+  const updateBorderRadius = React.useCallback(
+    (value: number) => {
+      if (value === borderRadius) return
+      setCSSVariable("border-radius", `${value}px`)
+      localStorage.setItem(STORAGE_KEY_RADIUS, value.toString())
+      setBorderRadius(value)
+    },
+    [borderRadius],
+  )
 
-    r.style.setProperty("--dark-background", color.darkBg)
-    r.style.setProperty("--dark-main", color.darkMain)
-    r.style.setProperty("--light-background", color.bg)
-    r.style.setProperty("--light-main", color.main)
-  }, [])
+  const updateHorizontalBoxShadow = React.useCallback(
+    (value: number) => {
+      if (value === boxShadowX) return
+      setCSSVariable("box-shadow-x", value + "px")
+      localStorage.setItem(STORAGE_KEY_SHADOW, [value, boxShadowY].join(","))
+      setBoxShadowX(value)
+    },
+    [boxShadowX, boxShadowY],
+  )
 
-  const updateBorderRadius = useCallback((value: number) => {
-    const r = window.document.querySelector(":root") as HTMLElement
-    r.style.setProperty("--border-radius", `${value}px`)
+  const updateVerticalBoxShadow = React.useCallback(
+    (value: number) => {
+      if (value === boxShadowY) return
+      setCSSVariable("box-shadow-y", value + "px")
+      localStorage.setItem(STORAGE_KEY_SHADOW, [boxShadowX, value].join(","))
+      setBoxShadowY(value)
+    },
+    [boxShadowX, boxShadowY],
+  )
 
-    localStorage.setItem("borderRadius", value.toString())
+  const updateHeadingFontWeight = React.useCallback(
+    (value: number) => {
+      if (value === fontWeightHeading) return
+      setCSSVariable("heading-font-weight", `${value}`)
+      localStorage.setItem(STORAGE_KEY_FONT_WEIGHT, [value, fontWeightBase].join(","))
+      setFontWeightHeading(value)
+    },
+    [fontWeightHeading, fontWeightBase],
+  )
 
-    setBorderRadius(value)
-  }, [])
+  const updateBaseFontWeight = React.useCallback(
+    (value: number) => {
+      if (value === fontWeightBase) return
+      setCSSVariable("base-font-weight", `${value}`)
+      localStorage.setItem(STORAGE_KEY_FONT_WEIGHT, [fontWeightHeading, value].join(","))
+      setFontWeightBase(value)
+    },
+    [fontWeightHeading, fontWeightBase],
+  )
 
-  const updateHorizontalBoxShadow = useCallback((value: number) => {
-    const r = window.document.querySelector(":root") as HTMLElement
-    r.style.setProperty("--box-shadow-x", value + "px")
-
-    setBoxShadowLength((prev) => {
-      const next: [number, number] = [value, prev[1]]
-      localStorage.setItem("boxShadow", next.join(","))
-      return next
-    })
-  }, [])
-
-  const updateVerticalBoxShadow = useCallback((value: number) => {
-    const r = window.document.querySelector(":root") as HTMLElement
-    r.style.setProperty("--box-shadow-y", value + "px")
-
-    setBoxShadowLength((prev) => {
-      const next: [number, number] = [prev[0], value]
-      localStorage.setItem("boxShadow", next.join(","))
-      return next
-    })
-  }, [])
-
-  const updateHeadingFontWeight = useCallback((value: number) => {
-    const r = window.document.querySelector(":root") as HTMLElement
-    r.style.setProperty("--heading-font-weight", `${value}`)
-
-    setFontWeight((prev) => {
-      const next: [number, number] = [value, prev[1]]
-      localStorage.setItem("fontWeight", next.join(","))
-      return next
-    })
-  }, [])
-
-  const updateBaseFontWeight = useCallback((value: number) => {
-    const r = window.document.querySelector(":root") as HTMLElement
-    r.style.setProperty("--base-font-weight", `${value}`)
-
-    setFontWeight((prev) => {
-      const next: [number, number] = [prev[0], value]
-      localStorage.setItem("fontWeight", next.join(","))
-      return next
-    })
-  }, [])
-
-  const resetStyling = useCallback(() => {
-    const r = window.document.querySelector(":root") as HTMLElement
-
+  const resetStyling = React.useCallback(() => {
     updateColor(defaultColorPalette.name)
 
-    r.style.setProperty("--border-radius", "5px")
-    r.style.setProperty("--box-shadow-x", "4px")
-    r.style.setProperty("--box-shadow-y", "4px")
-    r.style.setProperty("--heading-font-weight", "700")
-    r.style.setProperty("--base-font-weight", "500")
+    setCSSVariable("border-radius", "5px")
+    setCSSVariable("box-shadow-x", "4px")
+    setCSSVariable("box-shadow-y", "4px")
+    setCSSVariable("heading-font-weight", "700")
+    setCSSVariable("base-font-weight", "500")
 
     setColor(defaultColorPalette)
     setBorderRadius(5)
-    setBoxShadowLength([4, 4])
-    setFontWeight([700, 500])
+    setBoxShadowX(4)
+    setBoxShadowY(4)
+    setFontWeightHeading(700)
+    setFontWeightBase(500)
 
-    localStorage.clear()
+    localStorage.removeItem(STORAGE_KEY_COLOR)
+    localStorage.removeItem(STORAGE_KEY_RADIUS)
+    localStorage.removeItem(STORAGE_KEY_SHADOW)
+    localStorage.removeItem(STORAGE_KEY_FONT_WEIGHT)
+
+    toast.success("Styling reset successfully.")
   }, [updateColor])
 
   // ⚡ Bolt: Memoize the large CSS template literal to prevent re-computation on every render.
-  const styling = useMemo(
+  const styling = React.useMemo(
     () => `@import "tailwindcss";
 @import "tw-animate-css";
 
@@ -257,7 +459,7 @@ export default function Styling() {
   --border: oklch(0% 0 0);
   --ring: oklch(0% 0 0);
   --overlay: oklch(0% 0 0 / 0.8);
-  --shadow: ${boxShadowLength[0]}px ${boxShadowLength[1]}px 0px 0px var(--border);
+  --shadow: ${boxShadowX}px ${boxShadowY}px 0px 0px var(--border);
   --chart-1: ${chart1};
   --chart-2: ${chart2};
   --chart-3: ${chart3};
@@ -274,7 +476,7 @@ export default function Styling() {
   --main: ${darkMain};
   --border: oklch(0% 0 0);
   --ring: oklch(100% 0 0);
-  --shadow: ${boxShadowLength[0]}px ${boxShadowLength[1]}px 0px 0px var(--border);
+  --shadow: ${boxShadowX}px ${boxShadowY}px 0px 0px var(--border);
   --chart-1: ${darkChart1};
   --chart-2: ${darkChart2};
   --chart-3: ${darkChart3};
@@ -298,14 +500,14 @@ export default function Styling() {
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
 
-  --spacing-boxShadowX: ${boxShadowLength[0]}px;
-  --spacing-boxShadowY: ${boxShadowLength[1]}px;
-  --spacing-reverseBoxShadowX: -${boxShadowLength[0]}px;
-  --spacing-reverseBoxShadowY: -${boxShadowLength[1]}px;
+  --spacing-boxShadowX: ${boxShadowX}px;
+  --spacing-boxShadowY: ${boxShadowY}px;
+  --spacing-reverseBoxShadowX: -${boxShadowX}px;
+  --spacing-reverseBoxShadowY: -${boxShadowY}px;
   --radius-base: ${borderRadius}px;
   --shadow-shadow: var(--shadow);
-  --font-weight-base: ${fontWeight[1]};
-  --font-weight-heading: ${fontWeight[0]};
+  --font-weight-base: ${fontWeightBase};
+  --font-weight-heading: ${fontWeightHeading};
 }
   
 @layer base {
@@ -320,7 +522,8 @@ export default function Styling() {
     [
       bg,
       main,
-      boxShadowLength,
+      boxShadowX,
+      boxShadowY,
       chart1,
       chart2,
       chart3,
@@ -334,7 +537,8 @@ export default function Styling() {
       darkChart4,
       darkChart5,
       borderRadius,
-      fontWeight,
+      fontWeightBase,
+      fontWeightHeading,
     ],
   )
 
@@ -349,138 +553,70 @@ export default function Styling() {
             <SheetTitle>Customize styling</SheetTitle>
           </SheetHeader>
           <div className="grid flex-1 auto-rows-min overflow-y-auto gap-4 px-4">
-            <div className="grid gap-3">
-              <Label htmlFor="color">Color</Label>
-              <Select value={name} onValueChange={updateColor}>
-                <SelectTrigger
-                  id="color"
-                  className="bg-secondary-background text-foreground"
-                >
-                  <SelectValue placeholder="Select a color" />
-                </SelectTrigger>
-                <SelectContent className="bg-secondary-background text-foreground">
-                  {colors.map(({ name, main }) => (
-                    <SelectItem key={name} value={name}>
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="size-4 rounded-full border-2 border-border"
-                          style={{ backgroundColor: main }}
-                        />
-                        {name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-3">
-              <Label htmlFor="border-radius">Border Radius</Label>
-              <div className="grid grid-cols-4 gap-2">
-                {[0, 5, 10, 15].map((btn) => (
-                  <Button
-                    onClick={() => updateBorderRadius(btn)}
-                    className={cn(
-                      "h-8",
-                      borderRadius === btn
-                        ? "bg-main text-main-foreground"
-                        : "bg-secondary-background text-foreground",
-                    )}
-                    key={btn}
-                    variant="noShadow"
-                  >
-                    {`${btn} px`}
-                  </Button>
-                ))}
-              </div>
-            </div>
-            <div className="grid gap-3">
-              <Label htmlFor="border-radius">Horizontal Box Shadow</Label>
-              <div className="grid grid-cols-5 gap-2">
-                {[-4, -2, 0, 2, 4].map((btn) => (
-                  <Button
-                    onClick={() => updateHorizontalBoxShadow(btn)}
-                    className={cn(
-                      "h-8",
-                      boxShadowLength[0] === btn
-                        ? "bg-main text-main-foreground"
-                        : "bg-secondary-background text-foreground",
-                    )}
-                    key={btn}
-                    variant="noShadow"
-                  >
-                    {`${btn} px`}
-                  </Button>
-                ))}
-              </div>
-            </div>
-            <div className="grid gap-3">
-              <Label htmlFor="border-radius">Vertical Box Shadow</Label>
-              <div className="grid grid-cols-5 gap-2">
-                {[-4, -2, 0, 2, 4].map((btn) => (
-                  <Button
-                    onClick={() => updateVerticalBoxShadow(btn)}
-                    className={cn(
-                      "h-8",
-                      boxShadowLength[1] === btn
-                        ? "bg-main text-main-foreground"
-                        : "bg-secondary-background text-foreground",
-                    )}
-                    key={btn}
-                    variant="noShadow"
-                  >
-                    {`${btn} px`}
-                  </Button>
-                ))}
-              </div>
-            </div>
-            <div className="grid gap-3">
-              <Label htmlFor="border-radius">Heading Font Weight</Label>
-              <div className="grid grid-cols-3 gap-2">
-                {[700, 800, 900].map((btn) => (
-                  <Button
-                    onClick={() => updateHeadingFontWeight(btn)}
-                    className={cn(
-                      "h-8",
-                      fontWeight[0] === btn
-                        ? "bg-main text-main-foreground"
-                        : "bg-secondary-background text-foreground",
-                    )}
-                    key={btn}
-                    variant="noShadow"
-                  >
-                    {btn}
-                  </Button>
-                ))}
-              </div>
-            </div>
-            <div className="grid gap-3">
-              <Label htmlFor="border-radius">Base Font Weight</Label>
-              <div className="grid grid-cols-3 gap-2">
-                {[500, 600, 700].map((btn) => (
-                  <Button
-                    onClick={() => updateBaseFontWeight(btn)}
-                    className={cn(
-                      "h-8",
-                      fontWeight[1] === btn
-                        ? "bg-main text-main-foreground"
-                        : "bg-secondary-background text-foreground",
-                    )}
-                    key={btn}
-                    variant="noShadow"
-                  >
-                    {btn}
-                  </Button>
-                ))}
-              </div>
-            </div>
+            <ColorSection value={name} onValueChange={updateColor} />
+            <OptionSection
+              id="border-radius"
+              label="Border Radius"
+              options={BORDER_RADIUS_OPTIONS}
+              currentValue={borderRadius}
+              onSelect={updateBorderRadius}
+              unit=" px"
+            />
+            <OptionSection
+              id="horizontal-box-shadow"
+              label="Horizontal Box Shadow"
+              options={HORIZONTAL_BOX_SHADOW_OPTIONS}
+              currentValue={boxShadowX}
+              onSelect={updateHorizontalBoxShadow}
+              unit=" px"
+            />
+            <OptionSection
+              id="vertical-box-shadow"
+              label="Vertical Box Shadow"
+              options={VERTICAL_BOX_SHADOW_OPTIONS}
+              currentValue={boxShadowY}
+              onSelect={updateVerticalBoxShadow}
+              unit=" px"
+            />
+            <OptionSection
+              id="heading-font-weight"
+              label="Heading Font Weight"
+              options={HEADING_FONT_WEIGHT_OPTIONS}
+              currentValue={fontWeightHeading}
+              onSelect={updateHeadingFontWeight}
+            />
+            <OptionSection
+              id="base-font-weight"
+              label="Base Font Weight"
+              options={BASE_FONT_WEIGHT_OPTIONS}
+              currentValue={fontWeightBase}
+              onSelect={updateBaseFontWeight}
+            />
           </div>
           <SheetFooter>
             <SheetClose asChild>
               <Button>Save changes</Button>
             </SheetClose>
-            <Button variant="neutral" onClick={resetStyling}>
-              Reset
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="neutral">Reset</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action will reset all your theme customizations to
+                    their default values. This cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={resetStyling}>
+                    Continue
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </SheetFooter>
         </SheetContent>
       </Sheet>
@@ -495,12 +631,12 @@ export default function Styling() {
               Copy the styling to your globals.css file.
             </DialogDescription>
           </DialogHeader>
-          <Pre
+          <LazyPre
             wrapperClassName="w-full max-w-full text-white overflow-x-auto"
             __rawstring__={styling}
           >
             {styling}
-          </Pre>
+          </LazyPre>
         </DialogContent>
       </Dialog>
     </div>

@@ -1,32 +1,48 @@
-/**
- * @preview ![img](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAArFJREFUSEuFVs1u2kAYHBuUSs0hh9qc6pBzkIAUSl+h5FHg3iCFnOJDeICkT9LwDKUgMBI5h9BLsXugUnpIwVvteo2/zdrgi8l69/uZmW82BmOMQTz8ZUQ/037Tz3LX/heDETLGDHFYjZAsyXX1lcTOSizXowS0appsT9CdTcUJBERaoBS4GAcuQtPgUCodZ7dBOqCIphxgwHqzFpvy+fxO1mgkIyE5WZ7NZjgtlTTKV6uV2HR0dKQJ4WH2IM5sJaJApNUDXLsuri67QlhxP9OpJwAql8siAYvAgute47J7JQtK1vmeDIiioB/rdQwG32GYOXG41+uBU9bpdERJYRii0WhgOBwSVFR4iUxV9YsAmxAHbw5EgGq1iuNjB6Zh4vFxDm/qoVar4eXlBaZp6uMjU0YcpMgxrsPzPBHctm34vi+OWbaFwA8wHo/Ft9e46yRL7ceYUnz5Zh48+B1ELcqHr/1aLnfNfiRppQPGsFlv8Pz3GfP5HPff7nH39Q4/F4ttbM5FnMdxHLTbbTSbn3FSPMHbw0PkcnkYseNsE8iqOFo0Qb/fx+3tLRaLBe06RheO8x6tVgvn583sBIlVqDGoFgqFwhb/eJdl2Vj6SznQqjSpae6d5Mlkgg9nZ3hnWQiCQMS3LRt+4MObTFAuVzTboFzqk0wUxaRMR6MRKpUKisUiQsaweHoCT1yr1/GPyjRlYEkC3X/qtToGPwaRzhlw07uBaRj4cnEhqN6EDJ/ooFG5625KcZRW0e0qxEynU/F3ZBXJ47ouutu9apxMsytx43p1Ea1Wf0TlutkB3CBLp6WED93sqFXIKl5N+Hqdbdd0nBOSQc0u/Q7YjiqvXV7fBp2klAmhXO8kOXYwUVHKJZciGi2d4qbJ1/QrUzWe7GuSFqSQvPMSj+0k45+b9OKA/1xdmcOnyo5pAAAAAElFTkSuQmCC)
- */
-export default function Star21({
-  color,
-  size,
-  stroke,
-  strokeWidth,
-  pathClassName,
-  width,
-  height,
-  ...props
-}: React.SVGProps<SVGSVGElement> & {
+import * as React from "react"
+
+import { cn } from "@/lib/utils"
+
+export type Star21Props = React.ComponentPropsWithoutRef<"svg"> & {
   color?: string
   size?: number
   stroke?: string
   pathClassName?: string
   strokeWidth?: number
-}) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 200 200"
-      width={size ?? width}
-      height={size ?? height}
-      {...props}
-    >
-      <path
+}
+
+/**
+ * ⚡ Bolt: Star21 component optimized with React.memo and React.forwardRef.
+ * @preview ![img](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAArFJREFUSEuFVs1u2kAYHBuUSs0hh9qc6pBzkIAUSl+h5FHg3iCFnOJDeICkT9LwDKUgMBI5h9BLsXugUnpIwVvteo2/zdrgi8l69/uZmW82BmOMQTz8ZUQ/037Tz3LX/heDETLGDHFYjZAsyXX1lcTOSizXowS0appsT9CdTcUJBERaoBS4GAcuQtPgUCodZ7dBOqCIphxgwHqzFpvy+fxO1mgkIyE5WZ7NZjgtlTTKV6uV2HR0dKQJ4WH2IM5sJaJApNUDXLsuri67QlhxP9OpJwAql8siAYvAgute47J7JQtK1vmeDIiioB/rdQwG32GYOXG41+uBU9bpdERJYRii0WhgOBwSVFR4iUxV9YsAmxAHbw5EgGq1iuNjB6Zh4vFxDm/qoVar4eXlBaZp6uMjU0YcpMgxrsPzPBHctm34vi+OWbaFwA8wHo/Ft9e46yRL7ceYUnz5Zh48+B1ELcqHr/1aLnfNfiRppQPGsFlv8Pz3GfP5HPff7nH39Q4/F4ttbM5FnMdxHLTbbTSbn3FSPMHbw0PkcnkYseNsE8iqOFo0Qb/fx+3tLRaLBe06RheO8x6tVgvn583sBIlVqDGoFgqFwhb/eJdl2Vj6SznQqjSpae6d5Mlkgg9nZ3hnWQiCQMS3LRt+4MObTFAuVzTboFzqk0wUxaRMR6MRKpUKisUiQsaweHoCT1yr1/GPyjRlYEkC3X/qtToGPwaRzhlw07uBaRj4cnEhqN6EDJ/ooFG5625KcZRW0e0qxEynU/F3ZBXJ47ouutu9apxMsytx43p1Ea1Wf0TlutkB3CBLp6WED93sqFXIKl5N+Hqdbdd0nBOSQc0u/Q7YjiqvXV7fBp2klAmhXO8kOXYwUVHKJZciGi2d4qbJ1/QrUzWe7GuSFqSQvPMSj+0k45+b9OKA/1xdmcOnyo5pAAAAAElFTkSuQmCC)
+ */
+const Star21 = React.memo(
+  React.forwardRef<SVGSVGElement, Star21Props>(
+    (
+      {
+        color,
+        size,
+        stroke,
+        strokeWidth,
+        pathClassName,
+        width,
+        height,
+        className,
+        ...props
+      },
+      ref,
+    ) => {
+      return (
+        <svg
+          ref={ref}
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 200 200"
+          width={size ?? width}
+          height={size ?? height}
+          data-slot="star-s21"
+          className={cn(className)}
+          {...props}
+        >
+          <path
         fill={color ?? "currentColor"}
         stroke={stroke}
         strokeWidth={strokeWidth}
@@ -35,6 +51,12 @@ export default function Star21({
         clipRule="evenodd"
         fillRule="evenodd"
       />
-    </svg>
-  )
-}
+        </svg>
+      )
+    },
+  ),
+)
+
+Star21.displayName = "Star21"
+
+export default Star21

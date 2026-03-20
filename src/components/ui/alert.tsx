@@ -19,53 +19,77 @@ const alertVariants = cva(
   },
 )
 
-export type AlertProps = React.ComponentProps<"div"> &
+export type AlertProps = React.ComponentPropsWithoutRef<"div"> &
   VariantProps<typeof alertVariants>
 
-function Alert({ className, variant, ...props }: AlertProps) {
-  return (
-    <div
-      data-slot="alert"
-      role="alert"
-      className={cn(alertVariants({ variant }), className)}
-      {...props}
-    />
-  )
-}
+/**
+ * ⚡ Bolt: Alert component optimized with React.memo and React.forwardRef.
+ */
+const Alert = React.memo(
+  React.forwardRef<HTMLDivElement, AlertProps>(
+    ({ className, variant, ...props }, ref) => {
+      return (
+        <div
+          ref={ref}
+          data-slot="alert"
+          role="alert"
+          className={cn(alertVariants({ variant }), className)}
+          {...props}
+        />
+      )
+    },
+  ),
+)
 
 Alert.displayName = "Alert"
 
-export type AlertTitleProps = React.ComponentProps<"div">
+export type AlertTitleProps = React.ComponentPropsWithoutRef<"div">
 
-function AlertTitle({ className, ...props }: AlertTitleProps) {
-  return (
-    <div
-      data-slot="alert-title"
-      className={cn(
-        "col-start-2 line-clamp-1 min-h-4 font-heading tracking-tight",
-        className,
-      )}
-      {...props}
-    />
-  )
-}
+/**
+ * ⚡ Bolt: AlertTitle component optimized with React.memo and React.forwardRef.
+ */
+const AlertTitle = React.memo(
+  React.forwardRef<HTMLDivElement, AlertTitleProps>(
+    ({ className, ...props }, ref) => {
+      return (
+        <div
+          ref={ref}
+          data-slot="alert-title"
+          className={cn(
+            "col-start-2 line-clamp-1 min-h-4 font-heading tracking-tight",
+            className,
+          )}
+          {...props}
+        />
+      )
+    },
+  ),
+)
 
 AlertTitle.displayName = "AlertTitle"
 
-export type AlertDescriptionProps = React.ComponentProps<"div">
+export type AlertDescriptionProps = React.ComponentPropsWithoutRef<"div">
 
-function AlertDescription({ className, ...props }: AlertDescriptionProps) {
-  return (
-    <div
-      data-slot="alert-description"
-      className={cn(
-        "col-start-2 grid justify-items-start gap-1 text-sm font-base [&_p]:leading-relaxed",
-        className,
-      )}
-      {...props}
-    />
-  )
-}
+/**
+ * ⚡ Bolt: AlertDescription component optimized with React.memo and React.forwardRef.
+ */
+const AlertDescription = React.memo(
+  React.forwardRef<HTMLDivElement, AlertDescriptionProps>(
+    ({ className, ...props }, ref) => {
+      return (
+        <div
+          ref={ref}
+          data-slot="alert-description"
+          className={cn(
+            "col-start-2 grid justify-items-start gap-1 text-sm font-base [&_p]:leading-relaxed",
+            className,
+          )}
+          {...props}
+        />
+      )
+    },
+  ),
+)
 
 AlertDescription.displayName = "AlertDescription"
 

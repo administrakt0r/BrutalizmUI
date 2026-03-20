@@ -7,7 +7,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-base text-sm font-base ring-offset-white transition-all gap-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-2 border-border",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-base text-sm font-base transition-all gap-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border-2 border-border",
   {
     variants: {
       variant: {
@@ -33,37 +33,48 @@ const buttonVariants = cva(
   },
 )
 
-export interface ButtonProps
-  extends React.ComponentProps<"button">,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean
-  isLoading?: boolean
-}
+export type ButtonProps = React.ComponentPropsWithoutRef<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean
+    isLoading?: boolean
+  }
 
-function Button({
-  className,
-  variant,
-  size,
-  asChild = false,
-  isLoading = false,
-  children,
-  ...props
-}: ButtonProps) {
-  const Comp = asChild ? Slot : "button"
+/**
+ * ⚡ Bolt: Button component optimized with React.memo and React.forwardRef.
+ * This ensures stable references and prevents unnecessary re-renders.
+ */
+const Button = React.memo(
+  React.forwardRef<HTMLButtonElement, ButtonProps>(
+    (
+      {
+        className,
+        variant,
+        size,
+        asChild = false,
+        isLoading = false,
+        children,
+        ...props
+      },
+      ref,
+    ) => {
+      const Comp = asChild ? Slot : "button"
 
-  return (
-    <Comp
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      disabled={isLoading || props.disabled}
-      aria-busy={isLoading}
-      {...props}
-    >
-      {isLoading && !asChild && <Loader2 className="animate-spin" />}
-      {children}
-    </Comp>
-  )
-}
+      return (
+        <Comp
+          ref={ref}
+          data-slot="button"
+          className={cn(buttonVariants({ variant, size, className }))}
+          disabled={isLoading || props.disabled}
+          aria-busy={isLoading}
+          {...props}
+        >
+          {isLoading && !asChild && <Loader2 className="animate-spin" aria-hidden="true" />}
+          {children}
+        </Comp>
+      )
+    },
+  ),
+)
 
 Button.displayName = "Button"
 

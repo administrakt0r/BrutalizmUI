@@ -13,6 +13,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table"
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
+import { toast } from "sonner"
 
 import * as React from "react"
 
@@ -36,6 +37,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+
+import { cn } from "@/lib/utils"
 
 const data: Payment[] = [
   {
@@ -77,6 +80,13 @@ export type Payment = {
   email: string
 }
 
+// ⚡ Bolt: Extract Intl.NumberFormat instantiation outside of the column definition
+// to prevent creating a new instance for every cell during every render cycle.
+const amountFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+})
+
 export const columns: ColumnDef<Payment>[] = [
   {
     id: "select",
@@ -117,7 +127,7 @@ export const columns: ColumnDef<Payment>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Email
-          <ArrowUpDown />
+          <ArrowUpDown aria-hidden="true" />
         </Button>
       )
     },
@@ -130,10 +140,7 @@ export const columns: ColumnDef<Payment>[] = [
       const amount = parseFloat(row.getValue("amount"))
 
       // Format the amount as a dollar amount
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(amount)
+      const formatted = amountFormatter.format(amount)
 
       return <div className="text-right font-base">{formatted}</div>
     },
@@ -149,13 +156,16 @@ export const columns: ColumnDef<Payment>[] = [
           <DropdownMenuTrigger asChild>
             <Button variant="noShadow" className="size-8 p-0">
               <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
+              <MoreHorizontal aria-hidden="true" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.id)}
+              onClick={() => {
+                navigator.clipboard.writeText(payment.id)
+                toast.success("Payment ID copied to clipboard")
+              }}
             >
               Copy payment ID
             </DropdownMenuItem>
@@ -169,7 +179,10 @@ export const columns: ColumnDef<Payment>[] = [
   },
 ]
 
-export default function DataTableDemo() {
+/**
+ * ⚡ Bolt: DataTableDemo component optimized with React.memo.
+ */
+export const DataTableDemo = React.memo(() => {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
@@ -198,7 +211,10 @@ export default function DataTableDemo() {
   })
 
   return (
-    <div className="w-full font-base text-main-foreground">
+    <div
+      data-slot="data-table"
+      className="w-full font-base text-main-foreground"
+    >
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter emails..."
@@ -211,7 +227,7 @@ export default function DataTableDemo() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="noShadow" className="ml-auto">
-              Columns <ChevronDown />
+              Columns <ChevronDown aria-hidden="true" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -300,6 +316,7 @@ export default function DataTableDemo() {
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
+            aria-label="Go to previous page"
           >
             Previous
           </Button>
@@ -308,6 +325,7 @@ export default function DataTableDemo() {
             size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
+            aria-label="Go to next page"
           >
             Next
           </Button>
@@ -315,4 +333,6 @@ export default function DataTableDemo() {
       </div>
     </div>
   )
-}
+})
+
+DataTableDemo.displayName = "DataTableDemo"

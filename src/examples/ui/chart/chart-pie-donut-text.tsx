@@ -20,7 +20,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-export const description = "A donut chart with text"
+const description = "A donut chart with text"
 
 const chartData = [
   { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
@@ -56,11 +56,21 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export default function ChartPieDonutText() {
-  const totalVisitors = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.visitors, 0)
-  }, [])
+// ⚡ Bolt: Extract Intl.NumberFormat instantiation outside of the render loop
+const numberFormatter = new Intl.NumberFormat("en-US")
 
+/**
+ * @description
+ * Pre-computes the total visitors count from the static `chartData` array.
+ * This O(N) operation is extracted outside the React render loop to avoid unnecessary
+ * computation and object instantiation during re-renders, adhering to performance best practices.
+ */
+const totalVisitors = chartData.reduce((acc, curr) => acc + curr.visitors, 0)
+
+// ⚡ Bolt: Pre-format the total value outside the component to avoid calling .format() during every render
+const formattedTotalVisitors = numberFormatter.format(totalVisitors)
+
+export default function ChartPieDonutText() {
   return (
     <Card className="flex flex-col bg-secondary-background text-foreground">
       <CardHeader className="items-center pb-0">
@@ -99,7 +109,7 @@ export default function ChartPieDonutText() {
                           y={viewBox.cy}
                           className="fill-foreground text-3xl font-bold"
                         >
-                          {totalVisitors.toLocaleString()}
+                          {formattedTotalVisitors}
                         </tspan>
                         <tspan
                           x={viewBox.cx}

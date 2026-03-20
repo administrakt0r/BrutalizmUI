@@ -193,7 +193,9 @@ const data = {
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+  ...props
+}: React.ComponentPropsWithoutRef<typeof Sidebar>) {
   const { isMobile } = useSidebar()
   const [activeTeam, setActiveTeam] = React.useState(data.teams[0])
 

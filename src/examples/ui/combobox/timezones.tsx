@@ -57,27 +57,21 @@ const timezones = [
 
 type Timezone = (typeof timezones)[number]
 
+// ⚡ Bolt: Create O(1) lookup map for timezones to prevent repeated find/some on every render
+const timezoneMap = Object.fromEntries(
+  timezones.flatMap((group) =>
+    group.timezones.map((tz) => [
+      tz.value,
+      { label: tz.label, groupLabel: group.label },
+    ]),
+  ),
+)
+
 export default function TimezoneCombobox() {
   const [open, setOpen] = React.useState(false)
   const [value, setValue] = React.useState("America/New_York")
 
-  const selectedGroup = React.useMemo(
-    () =>
-      timezones.find((group) =>
-        group.timezones.some((tz) => tz.value === value),
-      ),
-    [value],
-  )
-
-  const selectedTimezoneLabel = React.useMemo(() => {
-    if (!selectedGroup) return undefined
-    for (const tz of selectedGroup.timezones) {
-      if (tz.value === value) {
-        return tz.label
-      }
-    }
-    return undefined
-  }, [value, selectedGroup])
+  const selectedTimezone = timezoneMap[value]
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -86,12 +80,12 @@ export default function TimezoneCombobox() {
           variant="noShadow"
           className="h-12 w-full justify-between px-2.5 md:max-w-[200px]"
         >
-          {selectedTimezoneLabel ? (
+          {selectedTimezone ? (
             <div className="flex flex-col items-start gap-0.5">
               <span className="text-main-foreground text-xs font-normal">
-                {selectedGroup?.label}
+                {selectedTimezone.groupLabel}
               </span>
-              <span>{selectedTimezoneLabel}</span>
+              <span>{selectedTimezone.label}</span>
             </div>
           ) : (
             "Select timezone"

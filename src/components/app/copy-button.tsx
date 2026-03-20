@@ -1,8 +1,9 @@
 "use client"
 
 import { Check, Clipboard } from "lucide-react"
+import { toast } from "sonner"
 
-import { useState } from "react"
+import * as React from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -11,45 +12,73 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-export interface CopyButtonProps {
+import { cn } from "@/lib/utils"
+
+export type CopyButtonProps = React.ComponentPropsWithoutRef<typeof Button> & {
   text: string
 }
 
-export function CopyButton({ text }: CopyButtonProps) {
-  const [isCopied, setIsCopied] = useState(false)
+/**
+ * 🌐 Atlas: CopyButton component optimized with React.memo and React.forwardRef.
+ */
+const CopyButton = React.memo(
+  React.forwardRef<HTMLButtonElement, CopyButtonProps>(
+    (
+      {
+        text,
+        className,
+        variant = "noShadow",
+        size = "icon",
+        "aria-label": ariaLabel,
+        ...props
+      },
+      ref,
+    ) => {
+      const [isCopied, setIsCopied] = React.useState(false)
 
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(text)
-      setIsCopied(true)
+      const copy = React.useCallback(async () => {
+        try {
+          await navigator.clipboard.writeText(text)
+          setIsCopied(true)
 
-      setTimeout(() => {
-        setIsCopied(false)
-      }, 1500)
-    } catch (error) {
-      console.error("Failed to copy", error)
-    }
-  }
+          setTimeout(() => {
+            setIsCopied(false)
+          }, 1500)
+        } catch (error) {
+          toast.error("Failed to copy code to clipboard.")
+        }
+      }, [text])
 
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          size="icon"
-          className="size-9 absolute right-3.5 top-2"
-          variant="noShadow"
-          onClick={copy}
-          aria-label={isCopied ? "Copied" : "Copy"}
-        >
-          <span className="sr-only">{isCopied ? "Copied" : "Copy"}</span>
-          {isCopied ? <Check aria-hidden="true" /> : <Clipboard aria-hidden="true" />}
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>
-        <p>{isCopied ? "Copied!" : "Copy code"}</p>
-      </TooltipContent>
-    </Tooltip>
-  )
-}
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              ref={ref}
+              data-slot="copy-button"
+              size={size}
+              variant={variant}
+              className={cn("size-9 absolute right-3.5 top-2", className)}
+              onClick={copy}
+              aria-label={isCopied ? "Copied" : (ariaLabel ?? "Copy code to clipboard")}
+              {...props}
+            >
+              <span className="sr-only">{isCopied ? "Copied" : (ariaLabel ?? "Copy code to clipboard")}</span>
+              {isCopied ? (
+                <Check aria-hidden="true" />
+              ) : (
+                <Clipboard aria-hidden="true" />
+              )}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{isCopied ? "Copied!" : "Copy code"}</p>
+          </TooltipContent>
+        </Tooltip>
+      )
+    },
+  ),
+)
 
 CopyButton.displayName = "CopyButton"
+
+export { CopyButton }

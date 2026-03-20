@@ -16,7 +16,7 @@ import {
 export default function SelectDemo() {
   return (
     <Select>
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger aria-label="Select chart type" className="w-[180px]">
         <SelectValue
           placeholder={
             <>

@@ -11,8 +11,6 @@ import {
 } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 
-import { cn } from "@/lib/utils"
-
 const notifications = [
   {
     title: "Your call has been confirmed.",
@@ -28,7 +26,7 @@ const notifications = [
   },
 ]
 
-type CardProps = React.ComponentProps<typeof Card>
+type CardProps = React.ComponentPropsWithoutRef<typeof Card>
 
 export default function CardDemo({ className, ...props }: CardProps) {
   return (

@@ -21,7 +21,7 @@ const docs = defineCollection({
     .object({
       slug: s.path(),
       title: s.string().max(50),
-      description: s.string().max(100),
+      description: s.string().max(200),
       shadcnDocsLink: s.string().optional(),
       body: s.mdx(),
     })

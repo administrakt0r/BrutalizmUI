@@ -18,7 +18,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-export const description = "A bar chart with negative values"
+const description = "A bar chart with negative values"
 
 const chartData = [
   { month: "January", visitors: 186 },

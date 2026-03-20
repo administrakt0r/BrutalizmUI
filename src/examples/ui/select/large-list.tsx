@@ -9,7 +9,7 @@ import {
 export default function SelectDemo() {
   return (
     <Select>
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger aria-label="Select an item" className="w-[180px]">
         <SelectValue placeholder="Large List" />
       </SelectTrigger>
       <SelectContent>

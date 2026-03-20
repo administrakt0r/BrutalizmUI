@@ -5,6 +5,13 @@ import { type ThemeProviderProps } from "next-themes/dist/types"
 
 import * as React from "react"
 
-export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>
-}
+/**
+ * ⚡ Bolt: ThemeProvider component optimized with React.memo.
+ */
+export const ThemeProvider = React.memo(
+  ({ children, ...props }: ThemeProviderProps) => {
+    return <NextThemesProvider {...props}>{children}</NextThemesProvider>
+  },
+)
+
+ThemeProvider.displayName = "ThemeProvider"

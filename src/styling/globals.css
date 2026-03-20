@@ -89,25 +89,9 @@
   --animate-marquee2: marquee2 5s linear infinite;
 
   --spacing-container: 1300px;
-
-  @keyframes marquee {
-    0% {
-      transform: translateX(0%);
-    }
-    100% {
-      transform: translateX(-100%);
-    }
-  }
-
-  @keyframes marquee2 {
-    0% {
-      transform: translateX(100%);
-    }
-    100% {
-      transform: translateX(0%);
-    }
-  }
 }
+
+@import "./marquee.css";
 
 @layer base {
   body {

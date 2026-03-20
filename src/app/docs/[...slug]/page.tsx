@@ -9,7 +9,7 @@ import {
 export const dynamic = "force-static"
 export const dynamicParams = false
 
-interface DocPageProps {
+export type DocPageProps = {
   params: Promise<{
     slug: string[]
   }>
@@ -22,6 +22,13 @@ export async function generateMetadata(props: DocPageProps) {
   return {
     title: doc.title,
     description: doc.description,
+    keywords: [
+      doc.title.toLowerCase(),
+      "neobrutalism",
+      "brutalizmui documentation",
+      "react component",
+      "tailwind css 4",
+    ],
     alternates: {
       canonical: `/docs/${slugAsParams}`,
     },

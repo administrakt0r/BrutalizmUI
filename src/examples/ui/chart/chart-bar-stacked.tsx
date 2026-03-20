@@ -20,7 +20,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-export const description = "A stacked bar chart with a legend"
+const description = "A stacked bar chart with a legend"
 
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },

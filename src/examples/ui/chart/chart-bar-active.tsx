@@ -18,7 +18,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-export const description = "A bar chart with an active bar"
+const description = "A bar chart with an active bar"
 
 const chartData = [
   { browser: "chrome", visitors: 187, fill: "var(--color-chrome)" },

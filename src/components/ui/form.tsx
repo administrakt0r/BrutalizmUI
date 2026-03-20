@@ -29,6 +29,10 @@ type FormFieldContextValue<
 
 const FormFieldContext = React.createContext<FormFieldContextValue | null>(null)
 
+/**
+ * ⚡ Bolt: FormField component.
+ * Generic components are not easily memoized with React.memo while preserving generics.
+ */
 function FormField<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
@@ -39,6 +43,7 @@ function FormField<
     </FormFieldContext.Provider>
   )
 }
+
 FormField.displayName = "FormField"
 
 const useFormField = () => {
@@ -75,91 +80,145 @@ type FormItemContextValue = {
 
 const FormItemContext = React.createContext<FormItemContextValue | null>(null)
 
-function FormItem({ className, ...props }: React.ComponentProps<"div">) {
-  const id = React.useId()
+export type FormItemProps = React.ComponentPropsWithoutRef<"div">
 
-  return (
-    <FormItemContext.Provider value={{ id }}>
-      <div
-        data-slot="form-item"
-        className={cn("grid gap-2", className)}
-        {...props}
-      />
-    </FormItemContext.Provider>
-  )
-}
+/**
+ * ⚡ Bolt: FormItem component optimized with React.memo.
+ */
+const FormItem = React.memo(
+  React.forwardRef<HTMLDivElement, FormItemProps>(
+    ({ className, ...props }, ref) => {
+      const id = React.useId()
+
+      return (
+        <FormItemContext.Provider value={{ id }}>
+          <div
+            ref={ref}
+            data-slot="form-item"
+            className={cn("grid gap-2", className)}
+            {...props}
+          />
+        </FormItemContext.Provider>
+      )
+    },
+  ),
+)
+
 FormItem.displayName = "FormItem"
 
-function FormLabel({
-  className,
-  ...props
-}: React.ComponentProps<typeof LabelPrimitive.Root>) {
-  const { error, formItemId } = useFormField()
+export type FormLabelProps = React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
 
-  return (
-    <Label
-      data-slot="form-label"
-      data-error={!!error}
-      className={cn("font-heading", className)}
-      htmlFor={formItemId}
-      {...props}
-    />
-  )
-}
+/**
+ * ⚡ Bolt: FormLabel component optimized with React.memo.
+ */
+const FormLabel = React.memo(
+  React.forwardRef<
+    React.ElementRef<typeof LabelPrimitive.Root>,
+    FormLabelProps
+  >(({ className, ...props }, ref) => {
+    const { error, formItemId } = useFormField()
+
+    return (
+      <Label
+        ref={ref}
+        data-slot="form-label"
+        data-error={!!error}
+        className={cn("font-heading", className)}
+        htmlFor={formItemId}
+        {...props}
+      />
+    )
+  }),
+)
+
 FormLabel.displayName = "FormLabel"
 
-function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
-  const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
+export type FormControlProps = React.ComponentPropsWithoutRef<typeof Slot>
 
-  return (
-    <Slot
-      data-slot="form-control"
-      id={formItemId}
-      aria-describedby={
-        !error
-          ? `${formDescriptionId}`
-          : `${formDescriptionId} ${formMessageId}`
-      }
-      aria-invalid={!!error}
-      {...props}
-    />
-  )
-}
+/**
+ * ⚡ Bolt: FormControl component optimized with React.memo.
+ */
+const FormControl = React.memo(
+  React.forwardRef<React.ElementRef<typeof Slot>, FormControlProps>(
+    ({ ...props }, ref) => {
+      const { error, formItemId, formDescriptionId, formMessageId } =
+        useFormField()
+
+      return (
+        <Slot
+          ref={ref}
+          data-slot="form-control"
+          id={formItemId}
+          aria-describedby={
+            !error
+              ? `${formDescriptionId}`
+              : `${formDescriptionId} ${formMessageId}`
+          }
+          aria-invalid={!!error}
+          {...props}
+        />
+      )
+    },
+  ),
+)
+
 FormControl.displayName = "FormControl"
 
-function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
-  const { formDescriptionId } = useFormField()
+export type FormDescriptionProps = React.ComponentPropsWithoutRef<"p">
 
-  return (
-    <p
-      data-slot="form-description"
-      id={formDescriptionId}
-      className={cn("text-sm font-base text-foreground", className)}
-      {...props}
-    />
-  )
-}
+/**
+ * ⚡ Bolt: FormDescription component optimized with React.memo.
+ */
+const FormDescription = React.memo(
+  React.forwardRef<HTMLParagraphElement, FormDescriptionProps>(
+    ({ className, ...props }, ref) => {
+      const { formDescriptionId } = useFormField()
+
+      return (
+        <p
+          ref={ref}
+          data-slot="form-description"
+          id={formDescriptionId}
+          className={cn("text-sm font-base text-foreground", className)}
+          {...props}
+        />
+      )
+    },
+  ),
+)
+
 FormDescription.displayName = "FormDescription"
 
-function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
-  const { error, formMessageId } = useFormField()
-  const body = error ? String(error?.message ?? "") : props.children
+export type FormMessageProps = React.ComponentPropsWithoutRef<"p">
 
-  if (!body) {
-    return null
-  }
+/**
+ * ⚡ Bolt: FormMessage component optimized with React.memo.
+ */
+const FormMessage = React.memo(
+  React.forwardRef<HTMLParagraphElement, FormMessageProps>(
+    ({ className, ...props }, ref) => {
+      const { error, formMessageId } = useFormField()
+      const body = error ? String(error?.message ?? "") : props.children
 
-  return (
-    <p
-      data-slot="form-message"
-      id={formMessageId}
-      className={cn("text-sm font-base text-red-500", className)}
-      {...props}
-    >
-      {body}
-    </p>
-  )
-}
+      if (!body) {
+        return null
+      }
+
+      return (
+        <p
+          ref={ref}
+          data-slot="form-message"
+          id={formMessageId}
+          className={cn("text-sm font-base text-red-500", className)}
+          {...props}
+        >
+          {body}
+        </p>
+      )
+    },
+  ),
+)
+
 FormMessage.displayName = "FormMessage"
 
 export {

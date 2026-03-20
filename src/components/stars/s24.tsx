@@ -1,32 +1,48 @@
-/**
- * @preview ![img](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAg5JREFUSEuVVk16gjAQfWFbLb1EaQ8AXkZ31gN4ET2AdVcuI7iveIhqS7emXwYCEzNBy8KEJMzPe28mKq21RvuYibIvZvQWwpvytxrqorVWgqGQs/8GoSiDe77SQP37Aw2F8cPozlSlDFpnNPQ/hM1isaBxs9nQyOPq5260AYi4lx73KDIMKVwul35xEEsNBpFs1FqqqgovL69Q0Pg8HJAkCWc8gLJ14Bz1kze4TyYZyqKkk2maoih2xIcDI4e0jbeByJNps/sUP+H8fSbp0qFO0H1EcRzjdDoF+DA8BlRkoiPMtSJYBNudF1ZKXvE4JF+rIlJO2ZHBPpF+prUh3QTTSa9zLpJcHQ+YTmco96WMTWvbujCc5HmO5DkhbXNuugzq3xrL5RLb7RZdygHcWRqOPJRSmM/fsFqvMB6NCK4ug87B+1ZGnEfNHTMFWAfr9Qoj64CryJZndawwm05RlI0sbyWSphny/KOtDamSeeGzfRORMX9bRS3JXj1ZmfI6YEpoHPBHwMmIh1qHrzjKnt8H1wE0hfbdaNvDvVl6fIxxOn85DjhIvky9qm4WsixDWe7JWZqlKHY7P2qhnbFWITdfY9Do+tg2O/N+GGx2t0gWiLJLURTR1LZr784IVrIAi3QdD104PC6fg4Go+VZd1/Rqi6hvCfx2k1pFoA4cv/f8MRCQCJDspiTBFU7aldIfhetfv8JAjWAAAAAASUVORK5CYII=)
- */
-export default function Star24({
-  color,
-  size,
-  stroke,
-  strokeWidth,
-  pathClassName,
-  width,
-  height,
-  ...props
-}: React.SVGProps<SVGSVGElement> & {
+import * as React from "react"
+
+import { cn } from "@/lib/utils"
+
+export type Star24Props = React.ComponentPropsWithoutRef<"svg"> & {
   color?: string
   size?: number
   stroke?: string
   pathClassName?: string
   strokeWidth?: number
-}) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 200 200"
-      width={size ?? width}
-      height={size ?? height}
-      {...props}
-    >
-      <path
+}
+
+/**
+ * ⚡ Bolt: Star24 component optimized with React.memo and React.forwardRef.
+ * @preview ![img](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAg5JREFUSEuVVk16gjAQfWFbLb1EaQ8AXkZ31gN4ET2AdVcuI7iveIhqS7emXwYCEzNBy8KEJMzPe28mKq21RvuYibIvZvQWwpvytxrqorVWgqGQs/8GoSiDe77SQP37Aw2F8cPozlSlDFpnNPQ/hM1isaBxs9nQyOPq5260AYi4lx73KDIMKVwul35xEEsNBpFs1FqqqgovL69Q0Pg8HJAkCWc8gLJ14Bz1kze4TyYZyqKkk2maoih2xIcDI4e0jbeByJNps/sUP+H8fSbp0qFO0H1EcRzjdDoF+DA8BlRkoiPMtSJYBNudF1ZKXvE4JF+rIlJO2ZHBPpF+prUh3QTTSa9zLpJcHQ+YTmco96WMTWvbujCc5HmO5DkhbXNuugzq3xrL5RLb7RZdygHcWRqOPJRSmM/fsFqvMB6NCK4ug87B+1ZGnEfNHTMFWAfr9Qoj64CryJZndawwm05RlI0sbyWSphny/KOtDamSeeGzfRORMX9bRS3JXj1ZmfI6YEpoHPBHwMmIh1qHrzjKnt8H1wE0hfbdaNvDvVl6fIxxOn85DjhIvky9qm4WsixDWe7JWZqlKHY7P2qhnbFWITdfY9Do+tg2O/N+GGx2t0gWiLJLURTR1LZr784IVrIAi3QdD104PC6fg4Go+VZd1/Rqi6hvCfx2k1pFoA4cv/f8MRCQCJDspiTBFU7aldIfhetfv8JAjWAAAAAASUVORK5CYII=)
+ */
+const Star24 = React.memo(
+  React.forwardRef<SVGSVGElement, Star24Props>(
+    (
+      {
+        color,
+        size,
+        stroke,
+        strokeWidth,
+        pathClassName,
+        width,
+        height,
+        className,
+        ...props
+      },
+      ref,
+    ) => {
+      return (
+        <svg
+          ref={ref}
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 200 200"
+          width={size ?? width}
+          height={size ?? height}
+          data-slot="star-s24"
+          className={cn(className)}
+          {...props}
+        >
+          <path
         fill={color ?? "currentColor"}
         stroke={stroke}
         strokeWidth={strokeWidth}
@@ -35,6 +51,12 @@ export default function Star24({
         clipRule="evenodd"
         fillRule="evenodd"
       />
-    </svg>
-  )
-}
+        </svg>
+      )
+    },
+  ),
+)
+
+Star24.displayName = "Star24"
+
+export default Star24

@@ -29,27 +29,47 @@ progress {
   font: inherit;
 }
 
-@keyframes marquee-left {
-  from {
-    transform: translateX(0);
+@theme {
+  --animate-marquee: marquee 5s linear infinite;
+  --animate-marquee2: marquee2 5s linear infinite;
+  --animate-marquee-left: marquee-left var(--duration, 100s) linear infinite;
+  --animate-marquee-up: marquee-up var(--duration, 40s) linear infinite;
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
   }
-  to {
-    transform: translateX(calc(-100% - var(--gap)));
+
+  @keyframes marquee2 {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(0%);
+    }
   }
-}
-.animate-marquee-left {
-  animation: marquee-left var(--duration, 100s) linear infinite;
-}
-@keyframes marquee-up {
-  from {
-    transform: translateY(0);
+
+  @keyframes marquee-left {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
+    }
   }
-  to {
-    transform: translateY(calc(-100% - var(--gap)));
+
+  @keyframes marquee-up {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(calc(-100% - var(--gap)));
+    }
   }
-}
-.animate-marquee-up {
-  animation: marquee-up var(--duration, 40s) linear infinite;
 }
 .flex-row {
   flex-direction: row;

@@ -50,6 +50,12 @@ export default function ComboboxWithCheckbox() {
     Framework[]
   >([])
 
+  // ⚡ Bolt: Use a Set for O(1) lookups to avoid O(N) array.some() in the render loop
+  const selectedFrameworksSet = React.useMemo(
+    () => new Set(selectedFrameworks.map((f) => f.value)),
+    [selectedFrameworks],
+  )
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -77,7 +83,7 @@ export default function ComboboxWithCheckbox() {
                   value={framework.value}
                   onSelect={(currentValue) => {
                     setSelectedFrameworks(
-                      selectedFrameworks.some((f) => f.value === currentValue)
+                      selectedFrameworksSet.has(currentValue)
                         ? selectedFrameworks.filter(
                             (f) => f.value !== currentValue,
                           )
@@ -87,9 +93,7 @@ export default function ComboboxWithCheckbox() {
                 >
                   <div
                     className="border-border pointer-events-none size-5 shrink-0 rounded-base border-2 transition-all select-none *:[svg]:opacity-0 data-[selected=true]:*:[svg]:opacity-100"
-                    data-selected={selectedFrameworks.some(
-                      (f) => f.value === framework.value,
-                    )}
+                    data-selected={selectedFrameworksSet.has(framework.value)}
                   >
                     <CheckIcon className="size-4 text-current" />
                   </div>

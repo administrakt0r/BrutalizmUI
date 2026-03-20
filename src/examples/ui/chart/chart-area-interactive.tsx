@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-export const description = "An interactive area chart"
+const description = "An interactive area chart"
 
 const chartData = [
   { date: "2024-04-01", desktop: 222, mobile: 150 },
@@ -137,22 +137,45 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
+// ⚡ Bolt: Extract Intl.DateTimeFormat instantiation outside of the render loop
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+})
+
+// ⚡ Bolt: Pre-format dates into a map to avoid expensive instantiations and formatting inside the render loop
+const formattedDates = Object.fromEntries(
+  chartData.map((item) => [
+    item.date,
+    dateFormatter.format(new Date(item.date)),
+  ]),
+)
+
+// ⚡ Bolt: Avoid calling new Date() on every filter change by pre-calculating the reference date
+const referenceDateStr = "2024-06-30"
+const referenceDateObj = new Date(referenceDateStr)
+
 export default function ChartAreaInteractive() {
   const [timeRange, setTimeRange] = React.useState("90d")
 
-  const filteredData = chartData.filter((item) => {
-    const date = new Date(item.date)
-    const referenceDate = new Date("2024-06-30")
+  const filteredData = React.useMemo(() => {
     let daysToSubtract = 90
     if (timeRange === "30d") {
       daysToSubtract = 30
     } else if (timeRange === "7d") {
       daysToSubtract = 7
     }
-    const startDate = new Date(referenceDate)
+    const startDate = new Date(referenceDateObj)
     startDate.setDate(startDate.getDate() - daysToSubtract)
-    return date >= startDate
-  })
+
+    // ⚡ Bolt: Use string comparison for YYYY-MM-DD format to avoid expensive `new Date()`
+    // instantiation inside the loop, and extract invariant logic outside of `.filter()`.
+    const startDateStr = startDate.toISOString().split("T")[0]
+
+    return chartData.filter((item) => {
+      return item.date >= startDateStr
+    })
+  }, [timeRange])
 
   return (
     <Card className="bg-secondary-background text-foreground">
@@ -166,7 +189,7 @@ export default function ChartAreaInteractive() {
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger
             className="w-[160px] sm:ml-auto"
-            aria-label="Select a value"
+            aria-label="Select time range"
           >
             <SelectValue placeholder="Last 3 months" />
           </SelectTrigger>
@@ -191,11 +214,7 @@ export default function ChartAreaInteractive() {
               tickMargin={8}
               minTickGap={32}
               tickFormatter={(value) => {
-                const date = new Date(value)
-                return date.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                })
+                return formattedDates[value as string] || value
               }}
             />
             <ChartTooltip
@@ -203,10 +222,7 @@ export default function ChartAreaInteractive() {
               content={
                 <ChartTooltipContent
                   labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                    })
+                    return formattedDates[value as string] || value
                   }}
                   indicator="dot"
                 />

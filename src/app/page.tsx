@@ -1,12 +1,9 @@
 import { Marquee } from "@devnomic/marquee"
 import { ArrowUpRight } from "lucide-react"
-import { Metadata } from "next"
-
-import "@/styling/marquee.css"
 
 import * as React from "react"
+import { Metadata } from "next"
 import dynamic from "next/dynamic"
-import Image from "next/image"
 import Link from "next/link"
 
 import reviews from "@/data/reviews"
@@ -17,7 +14,6 @@ import {
   ShadcnIcon,
   TailwindIcon,
 } from "@/components/app/home-icons"
-import { Pre } from "@/components/app/pre"
 import ReviewCard from "@/components/app/review-card"
 import Star8 from "@/components/stars/s8"
 import Star9 from "@/components/stars/s9"
@@ -45,22 +41,37 @@ export const metadata: Metadata = {
   },
 }
 
-// ⚡ Bolt: Lazy load heavy interactive component
+// ⚡ Bolt: Lazy load heavy interactive component with loading placeholder to minimize CLS
 const StylingCustomizer = dynamic(
   () => import("@/components/app/styling-customizer"),
+  {
+    loading: () => (
+      <div className="mx-auto mt-10 h-[500px] w-[1000px] max-w-full animate-pulse rounded-base border-2 border-border bg-secondary-background shadow-shadow" />
+    ),
+  },
 )
 
 // ⚡ Bolt: Memoize Marquee items to prevent re-renders during animation
 const MarqueeStarRow = React.memo(() => (
   <div className="flex items-center md:gap-[50px] gap-[35px] xl:[&_span]:text-3xl md:[&_span]:text-2xl sm:[&_span]:text-xl [&_span]:text-base lg:[&_svg]:size-[50px] md:[&_svg]:size-10 [&_svg]:size-[30px]">
     <span>BrutalizmUI</span>
-    <Star32 className="text-foreground" />
+    <Star32 aria-hidden="true" className="text-foreground" />
     <span>BrutalizmUI</span>
-    <Star22 stroke="black" strokeWidth={6} color="var(--main)" />
+    <Star22
+      aria-hidden="true"
+      stroke="black"
+      strokeWidth={6}
+      color="var(--main)"
+    />
     <span>BrutalizmUI</span>
-    <Star11 className="text-foreground" />
+    <Star11 aria-hidden="true" className="text-foreground" />
     <span>BrutalizmUI</span>
-    <Star26 color="var(--main)" stroke="black" strokeWidth={7} />
+    <Star26
+      aria-hidden="true"
+      color="var(--main)"
+      stroke="black"
+      strokeWidth={7}
+    />
   </div>
 ))
 MarqueeStarRow.displayName = "MarqueeStarRow"
@@ -68,54 +79,146 @@ MarqueeStarRow.displayName = "MarqueeStarRow"
 const MarqueeStarRowReverse = React.memo(() => (
   <div className="flex items-center md:gap-[50px] gap-[35px] xl:[&_span]:text-3xl md:[&_span]:text-2xl sm:[&_span]:text-xl [&_span]:text-base lg:[&_svg]:size-[50px] md:[&_svg]:size-10 [&_svg]:size-[30px]">
     <span>BrutalizmUI</span>
-    <Star29 className="text-foreground" />
+    <Star29 aria-hidden="true" className="text-foreground" />
     <span>BrutalizmUI</span>
-    <Star37 stroke="black" strokeWidth={6} color="var(--main)" />
+    <Star37
+      aria-hidden="true"
+      stroke="black"
+      strokeWidth={6}
+      color="var(--main)"
+    />
     <span>BrutalizmUI</span>
-    <Star16 className="text-foreground" />
+    <Star16 aria-hidden="true" className="text-foreground" />
     <span>BrutalizmUI</span>
-    <Star8 color="var(--main)" stroke="black" strokeWidth={7} />
+    <Star8
+      aria-hidden="true"
+      color="var(--main)"
+      stroke="black"
+      strokeWidth={7}
+    />
   </div>
 ))
 MarqueeStarRowReverse.displayName = "MarqueeStarRowReverse"
 
-export default function Home() {
-  const faqJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: "Are these components accessible?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Most of the components are based on shadcn/ui, which means they are accessible because under the hood they use radix-ui which is fully accessible.",
-        },
+// ⚡ Bolt: Define static data outside the component to eliminate redundant work on every render.
+const FAQ_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "Are these components accessible?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Most of the components are based on shadcn/ui, which means they are accessible because under the hood they use radix-ui which is fully accessible.",
       },
-      {
-        "@type": "Question",
-        name: "Why copy/paste and not packaged as a dependency?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "BrutalizmUI follows the shadcn/ui philosophy of giving you ownership and control over the code. This allows you to decide how components are built and styled, separating implementation from design without the coupling typical of npm packages.",
-        },
+    },
+    {
+      "@type": "Question",
+      name: "Why copy/paste and not packaged as a dependency?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "BrutalizmUI follows the shadcn/ui philosophy of giving you ownership and control over the code. This allows you to decide how components are built and styled, separating implementation from design without the coupling typical of npm packages.",
       },
-      {
-        "@type": "Question",
-        name: "How to contribute to BrutalizmUI?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "You can contribute by visiting the project repository on GitHub and following the contributing.md guidelines. We welcome collaboration and adoption of the neobrutalism aesthetic.",
-        },
+    },
+    {
+      "@type": "Question",
+      name: "How to contribute to BrutalizmUI?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "You can contribute by visiting the project repository on GitHub and following the contributing.md guidelines. We welcome collaboration and adoption of the neobrutalism aesthetic.",
       },
-    ],
-  }
+    },
+    {
+      "@type": "Question",
+      name: "Does BrutalizmUI support Tailwind CSS 4?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes, BrutalizmUI is built with Tailwind CSS 4, utilizing its native CSS variables and @theme blocks for efficient and modern styling.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What is the Copy-Paste Ownership model?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "The Copy-Paste Ownership model encourages developers to copy component source code directly into their projects. This ensures full control, zero dependency bloat, and the ability to customize components without being tied to a third-party library's release cycle.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "How can AI agents search the component registry?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "AI agents can programmatically discover all available neobrutalism components by fetching the registry index at https://brutalizmui.pages.dev/registry.json. This allows for automated identification and installation of specific primitives.",
+      },
+    },
+  ],
+}
 
+const WEB_PAGE_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: "BrutalizmUI - Neobrutalism UI Library",
+  description:
+    "An open-source library of neobrutalism-styled components based on shadcn/ui and Tailwind CSS.",
+  url: "https://brutalizmui.pages.dev/",
+  image: "https://brutalizmui.pages.dev/preview.png",
+  publisher: {
+    "@type": "Organization",
+    name: "BrutalizmUI",
+    logo: {
+      "@type": "ImageObject",
+      url: "https://brutalizmui.pages.dev/favicon.ico",
+    },
+  },
+  dateModified: "2026-03-18T00:00:00Z",
+}
+
+const REVIEW_GROUPS = [
+  [reviews[0], reviews[1]],
+  [reviews[2], reviews[3], reviews[4]],
+  [reviews[5], reviews[6]],
+]
+
+// ⚡ Bolt: Hoist static array to the module level to ensure a stable reference
+// and eliminate redundant array allocations during React's render cycles.
+const REVIEWS_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "Developer Testimonials",
+  itemListElement: reviews.map((review, index) => ({
+    "@type": "Review",
+    position: index + 1,
+    author: {
+      "@type": "Person",
+      name: review.fullName,
+      jobTitle: review.jobTitle,
+    },
+    reviewBody: review.review,
+    publisher: {
+      "@type": "Organization",
+      name: "BrutalizmUI",
+    },
+  })),
+}
+
+const MARQUEE_ITEMS = Array.from({ length: 7 })
+
+export default function Home() {
   return (
     <div className="text-foreground font-base prose-headings:font-heading prose-h1:2xl:text-6xl prose-h1:xl:text-5xl prose-h1:md:text-5xl prose-h1:sm:text-[33px] prose-h1:text-2xl prose-h2:2xl:text-4xl prose-h2:lg:text-4xl prose-h2:md:text-3xl prose-h2:text-2xl prose-h3:2xl:text-4xl prose-h3:xl:text-3xl prose-h3:lg:text-3xl prose-h3:md:text-2xl prose-h3:sm:text-xl">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(WEB_PAGE_JSON_LD) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(FAQ_JSON_LD) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(REVIEWS_JSON_LD) }}
       />
       <main
         id="main-content"
@@ -128,11 +231,13 @@ export default function Home() {
               <span className="relative px-2 sm:mr-2 mr-0 md:[&_svg]:size-[45px] sm:[&_svg]:size-7 bg-main/50 rounded-base border-2 border-border/40 dark:border-border/70">
                 neobrutalism
                 <Star9
+                  aria-hidden="true"
                   className="absolute sm:block hidden md:-bottom-4 md:-right-5 -bottom-2.5 -right-2.5"
                   color="var(--main)"
                   pathClassName="stroke-5 dark:stroke-3.5 stroke-black dark:stroke-black/70"
                 />
                 <Star9
+                  aria-hidden="true"
                   className="absolute sm:block hidden md:-top-4 md:-left-5 -top-2.5 -left-2.5"
                   color="var(--main)"
                   pathClassName="stroke-5 dark:stroke-3.5 stroke-black dark:stroke-black/70"
@@ -142,9 +247,11 @@ export default function Home() {
             </h1>
 
             <p className="leading-snug w-full md:mt-[50px] md:mb-[60px] sm:mt-12 my-9 sm:mb-10 2xl:text-3xl xl:text-2xl lg:text-2xl xl:w-full lg:w-2/3 md:w-full md:text-2xl sm:text-xl text-xl">
-              BrutalizmUI is an open-source library of neobrutalism-styled
-              components based on shadcn/ui, designed to help you create bold
-              and high-contrast user interfaces with React and Tailwind CSS.
+              BrutalizmUI is a high-performance, open-source library of
+              neobrutalism-styled components built with Next.js 16, Tailwind CSS
+              4, and Radix UI. Optimized for speed and GEO, it offers a
+              copy-paste ownership model for maximum developer control and zero
+              dependency bloat.
             </p>
 
             <Link
@@ -153,7 +260,10 @@ export default function Home() {
               aria-label="Read the documentation"
             >
               Read the docs
-              <ArrowUpRight className="md:size-[30px] size-5" />
+              <ArrowUpRight
+                aria-hidden="true"
+                className="md:size-[30px] size-5"
+              />
             </Link>
           </div>
         </div>
@@ -162,8 +272,9 @@ export default function Home() {
         <Marquee
           className="border-t-4 border-border md:[&_.animate-marquee-left]:gap-[50px]! [&_.animate-marquee-left]:gap-[35px]! bg-secondary-background md:py-4 py-3"
           direction="left"
+          aria-label="BrutalizmUI decorative banner"
         >
-          {Array.from({ length: 7 }).map((_, id) => (
+          {MARQUEE_ITEMS.map((_, id) => (
             <MarqueeStarRow key={id} />
           ))}
         </Marquee>
@@ -174,7 +285,9 @@ export default function Home() {
                 <TailwindIcon />
               </div>
 
-              <h3>Made with Tailwind</h3>
+              <h2 className="xl:text-3xl lg:text-2xl sm:text-xl text-lg font-heading">
+                Built with Tailwind CSS 4
+              </h2>
             </div>
 
             <p className="2xl:text-2xl xl:text-xl md:text-base sm:text-lg text-base">
@@ -188,7 +301,9 @@ export default function Home() {
                 <OpenSourceIcon />
               </div>
 
-              <h3>Open source</h3>
+              <h2 className="xl:text-3xl lg:text-2xl sm:text-xl text-lg font-heading">
+                Open Source and Community-Driven
+              </h2>
             </div>
 
             <p className="2xl:text-2xl xl:text-xl md:text-base sm:text-lg text-base">
@@ -202,7 +317,9 @@ export default function Home() {
                 <ShadcnIcon />
               </div>
 
-              <h3>Based on Shadcn/ui</h3>
+              <h2 className="xl:text-3xl lg:text-2xl sm:text-xl text-lg font-heading">
+                Architected with Shadcn/ui
+              </h2>
             </div>
 
             <p className="2xl:text-2xl xl:text-xl md:text-base sm:text-lg text-base">
@@ -216,7 +333,9 @@ export default function Home() {
                 <CustomizableIcon />
               </div>
 
-              <h3>Customizable</h3>
+              <h2 className="xl:text-3xl lg:text-2xl sm:text-xl text-lg font-heading">
+                Extensively Customizable Primitives
+              </h2>
             </div>
 
             <p className="2xl:text-2xl xl:text-xl md:text-base sm:text-lg text-base">
@@ -226,7 +345,7 @@ export default function Home() {
         </div>
         <section className="border-b-4 border-b-border bg-background py-16 lg:py-[100px]">
           <h2 className="mb-5 px-5 text-center">
-            Fully customizable set of components.
+            Dynamic Customization for Neobrutalism Themes
           </h2>
 
           <p className="text-center px-5 xl:text-xl md:text-lg sm:text-base text-sm">
@@ -242,6 +361,7 @@ export default function Home() {
         </section>
         <section className="inset-0 flex relative overflow-hidden w-full px-5 flex-col items-center justify-center bg-secondary-background bg-[linear-gradient(to_right,#80808033_1px,transparent_1px),linear-gradient(to_bottom,#80808033_1px,transparent_1px)] bg-[size:70px_70px] z-0">
           <Star20
+            aria-hidden="true"
             color="var(--main)"
             stroke="black"
             strokeWidth={3}
@@ -249,6 +369,7 @@ export default function Home() {
             className="absolute top-[120px] lg:block hidden -left-[125px] -z-10"
           />
           <Star14
+            aria-hidden="true"
             color="var(--main)"
             stroke="black"
             strokeWidth={3}
@@ -257,14 +378,10 @@ export default function Home() {
           />
           <div className="mx-auto w-container max-w-full py-16 lg:py-[100px]">
             <h2 className="sm:mb-20 mb-14 text-center">
-              Loved by the community
+              Developer Testimonials and Community Feedback
             </h2>
             <div className="grid-cols-1 grid lg:grid-cols-3 gap-0 lg:gap-8">
-              {[
-                [reviews[0], reviews[1]],
-                [reviews[2], reviews[3], reviews[4]],
-                [reviews[5], reviews[6]],
-              ].map((card, index) => (
+              {REVIEW_GROUPS.map((card, index) => (
                 <div className="group flex flex-col justify-center" key={index}>
                   {card.map((review, index) => (
                     <ReviewCard key={index} {...review} />
@@ -276,7 +393,7 @@ export default function Home() {
         </section>
         <section className="border-t-4 z-0 border-t-border border-b-4 border-b-border bg-background py-16 lg:py-[100px]">
           <h2 className="sm:mb-20 mb-14 px-5 text-center">
-            Frequently asked questions
+            Technical FAQ and Common Inquiries
           </h2>
 
           <div className="mx-auto not-prose grid w-[700px] max-w-full px-5">
@@ -323,6 +440,7 @@ export default function Home() {
                   <a
                     target="_blank"
                     rel="noopener noreferrer"
+                    aria-label="Read the contributing guidelines on GitHub"
                     className="underline font-heading"
                     href="https://github.com/ekmas/neobrutalism-components/blob/main/CONTRIBUTING.md"
                   >
@@ -338,14 +456,15 @@ export default function Home() {
           className="border-b-4 border-border md:[&_.animate-marquee-left]:gap-[50px]! [&_.animate-marquee-left]:gap-[35px]! bg-secondary-background md:py-4 py-3"
           direction="left"
           reverse
+          aria-label="BrutalizmUI decorative banner reverse"
         >
-          {Array.from({ length: 7 }).map((_, id) => (
+          {MARQUEE_ITEMS.map((_, id) => (
             <MarqueeStarRowReverse key={id} />
           ))}
         </Marquee>
         <section className="inset-0 w-full flex flex-col items-center justify-center bg-main  bg-[linear-gradient(to_right,#00000033_1px,transparent_1px),linear-gradient(to_bottom,#00000033_1px,transparent_1px)] bg-[size:70px_70px] px-5 lg:py-[200px] md:py-[150px] sm:py-[100px] py-[100px]">
           <h2 className="text-center font-heading not-prose 2xl:text-5xl xl:text-5xl md:text-4xl sm:text-3xl text-[22px] text-main-foreground mb-12">
-            Start your BrutalizmUI project today.
+            Begin Your BrutalizmUI Development Journey
           </h2>
 
           <Link
@@ -354,65 +473,11 @@ export default function Home() {
             aria-label="Read the documentation"
           >
             Read the docs
-            <ArrowUpRight className="md:size-[30px] size-5" />
+            <ArrowUpRight
+              aria-hidden="true"
+              className="md:size-[30px] size-5"
+            />
           </Link>
-
-          {/* <Tabs defaultValue="pnpm" className="max-w-[650px] w-full h-max">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="pnpm">pnpm</TabsTrigger>
-              <TabsTrigger value="npm">npm</TabsTrigger>
-              <TabsTrigger value="yarn">yarn</TabsTrigger>
-              <TabsTrigger value="bun">bun</TabsTrigger>
-            </TabsList>
-            <TabsContent value="pnpm">
-              <Pre
-                __rawstring__="pnpm dlx shadcn@latest init https://brutalizmui.pages.dev/r/styling/blue.json"
-                data-language="bash"
-                wrapperClassName="mb-0!"
-              >
-                <code>
-                  <span className="text-white font-bold">pnpm</span>
-                  <span className="text-white/[0.53] ">{` dlx shadcn@latest init https://brutalizmui.pages.dev/r/styling/blue.json`}</span>
-                </code>
-              </Pre>
-            </TabsContent>
-            <TabsContent className="**:data-avatar:mb-0" value="npm">
-              <Pre
-                __rawstring__="npx shadcn@latest init https://brutalizmui.pages.dev/r/styling/blue.json"
-                data-language="bash"
-                wrapperClassName="mb-0!"
-              >
-                <code>
-                  <span className="text-white font-bold">npx</span>
-                  <span className="text-white/[0.53] ">{` shadcn@latest init https://brutalizmui.pages.dev/r/styling/blue.json`}</span>
-                </code>
-              </Pre>
-            </TabsContent>
-            <TabsContent value="yarn">
-              <Pre
-                __rawstring__="npx shadcn@latest init https://brutalizmui.pages.dev/r/styling/blue.json"
-                data-language="bash"
-                wrapperClassName="mb-0!"
-              >
-                <code>
-                  <span className="text-white font-bold">npx</span>
-                  <span className="text-white/[0.53] ">{` shadcn@latest init https://brutalizmui.pages.dev/r/styling/blue.json`}</span>
-                </code>
-              </Pre>
-            </TabsContent>
-            <TabsContent value="bun">
-              <Pre
-                __rawstring__="bunx shadcn@latest init https://brutalizmui.pages.dev/r/styling/blue.json"
-                data-language="bash"
-                wrapperClassName="mb-0!"
-              >
-                <code>
-                  <span className="text-white font-bold">bunx</span>
-                  <span className="text-white/[0.53] ">{` --bun shadcn@latest init https://brutalizmui.pages.dev/r/styling/blue.json`}</span>
-                </code>
-              </Pre>
-            </TabsContent>
-          </Tabs> */}
         </section>
       </div>
       <footer className="z-30 border-t-4 border-border bg-secondary-background px-5 py-5 text-center sm:text-base text-sm">
@@ -420,6 +485,7 @@ export default function Home() {
         <a
           target="_blank"
           rel="noopener noreferrer"
+          aria-label="Visit original Neobrutalism Components repository on GitHub"
           href="https://github.com/ekmas/neobrutalism-components"
           className="underline font-heading"
         >
@@ -429,6 +495,7 @@ export default function Home() {
         <a
           target="_blank"
           rel="noopener noreferrer"
+          aria-label="Visit maintained by administrakt0r on GitHub"
           href="https://github.com/administrakt0r"
           className="underline font-heading"
         >
@@ -438,6 +505,7 @@ export default function Home() {
         <a
           target="_blank"
           rel="noopener noreferrer"
+          aria-label="View original source on GitHub"
           href="https://github.com/ekmas/neobrutalism-components"
           className="underline font-heading"
         >
@@ -447,6 +515,7 @@ export default function Home() {
         <a
           target="_blank"
           rel="noopener noreferrer"
+          aria-label="View this fork on GitHub"
           href="https://github.com/administrakt0r/brutalizmUI/"
           className="underline font-heading"
         >

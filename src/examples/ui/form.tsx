@@ -30,7 +30,7 @@ export default function FormDemo() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(_values: z.infer<typeof formSchema>) {
     //
   }
 

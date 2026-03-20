@@ -6,15 +6,22 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function Progress({
-  className,
-  value,
-  ...props
-}: React.ComponentProps<typeof ProgressPrimitive.Root> & {
+export type ProgressProps = React.ComponentPropsWithoutRef<
+  typeof ProgressPrimitive.Root
+> & {
   value?: number
-}) {
-  return (
+}
+
+/**
+ * ⚡ Bolt: Progress component optimized with React.memo.
+ */
+const Progress = React.memo(
+  React.forwardRef<
+    React.ElementRef<typeof ProgressPrimitive.Root>,
+    ProgressProps
+  >(({ className, value, ...props }, ref) => (
     <ProgressPrimitive.Root
+      ref={ref}
       data-slot="progress"
       className={cn(
         "relative h-4 w-full overflow-hidden rounded-base border-2 border-border bg-secondary-background",
@@ -28,8 +35,9 @@ function Progress({
         style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
       />
     </ProgressPrimitive.Root>
-  )
-}
+  )),
+)
+
 Progress.displayName = "Progress"
 
 export { Progress }
