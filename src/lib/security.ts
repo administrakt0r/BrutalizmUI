@@ -9,9 +9,59 @@ const colorCache = new Map<string, string>()
 const cssVariableCache = new Map<string, string>()
 
 /**
+ * ⚡ Bolt: Cache for safe URL checks.
+ */
+const safeUrlCache = new Map<string, boolean>()
+
+/**
  * ⚡ Bolt: Maximum size for the sanitization caches to prevent memory leaks.
  */
 const MAX_CACHE_SIZE = 1000
+
+/**
+ * ⚡ Bolt: Hoisted regexes and constants to avoid recreation on every function call.
+ */
+const COLOR_REGEX = /^[-a-zA-Z0-9#(),.%\s+*\/]+$/
+const COLOR_FUNCTION_REGEX = /([a-zA-Z-]+)\s*\(/g
+const ALLOWED_COLOR_FUNCTIONS = new Set([
+  "rgb",
+  "rgba",
+  "hsl",
+  "hsla",
+  "oklch",
+  "var",
+  "color-mix",
+  "light-dark",
+  "calc",
+  "min",
+  "max",
+  "clamp",
+])
+
+const BLOCKED_PROTOCOLS_REGEX =
+  /^(javascript|data|blob|file|ftp|about|chrome|config|view-source|resource|vbscript|tcl|ms-help|filesystem|jar|wyciwyg|mediasource|ms-appx-web|ms-appx|ms-appdata):/i
+
+const DANGEROUS_CHARS_REGEX =
+  /[\x00-\x1F\x7F-\x9F<>"'`()|{}\[\]\s\u00AD\u1680\u180E\u2000-\u200F\u202A-\u202E\u2028-\u202F\u205F-\u206F\u3000\uFEFF]/
+
+const BLOCKED_KEYS = new Set([
+  "__proto__",
+  "constructor",
+  "prototype",
+  "__definegetter__",
+  "__definesetter__",
+  "__lookupgetter__",
+  "__lookupsetter__",
+])
+
+const JSON_LD_REPLACE_MAP: Record<string, string> = {
+  "<": "\\u003c",
+  ">": "\\u003e",
+  "&": "\\u0026",
+  "\u2028": "\\u2028",
+  "\u2029": "\\u2029",
+}
+const JSON_LD_REPLACE_REGEX = /[<>&\u2028\u2029]/g
 
 /**
  * Sanitizes a color string for use in CSS variables.
@@ -39,7 +89,7 @@ export function sanitizeColor(color: string): string {
 
     // Allow only alphanumeric characters, spaces, and specific CSS punctuation used in color definitions.
     // Whitelist: a-z, A-Z, 0-9, space, #, %, ( ), ,, ., -, +, *, /
-    if (!/^[-a-zA-Z0-9#(),.%\s+*\/]+$/.test(color)) {
+    if (!COLOR_REGEX.test(color)) {
       return ""
     }
 
@@ -49,25 +99,11 @@ export function sanitizeColor(color: string): string {
     }
 
     // Extract function names: word followed by (
-    const regex = /([a-zA-Z-]+)\s*\(/g
+    // Reset regex lastIndex because it's global
+    COLOR_FUNCTION_REGEX.lastIndex = 0
     let match
-    const allowed = [
-      "rgb",
-      "rgba",
-      "hsl",
-      "hsla",
-      "oklch",
-      "var",
-      "color-mix",
-      "light-dark",
-      "calc",
-      "min",
-      "max",
-      "clamp",
-    ]
-
-    while ((match = regex.exec(color)) !== null) {
-      if (!allowed.includes(match[1].toLowerCase())) {
+    while ((match = COLOR_FUNCTION_REGEX.exec(color)) !== null) {
+      if (!ALLOWED_COLOR_FUNCTIONS.has(match[1].toLowerCase())) {
         return ""
       }
     }
@@ -98,120 +134,87 @@ export function isSafeUrl(url: string | undefined | null): boolean {
   if (!url || typeof url !== "string" || url.length > 2048) {
     return false
   }
+
+  // ⚡ Bolt: Return cached result if available.
+  if (safeUrlCache.has(url)) {
+    return safeUrlCache.get(url)!
+  }
+
   const trimmedUrl = url.trim()
 
-  // Explicitly block dangerous protocols as a fail-safe.
-  // data: and blob: can be used for XSS in link contexts.
-  const lowerUrl = trimmedUrl.toLowerCase()
-  const blockedProtocols = [
-    "javascript:",
-    "data:",
-    "blob:",
-    "file:",
-    "ftp:",
-    "about:",
-    "chrome:",
-    "config:",
-    "view-source:",
-    "resource:",
-    "vbscript:",
-    "tcl:",
-    "ms-help:",
-    "filesystem:",
-    "jar:",
-    "wyciwyg:",
-    "mediasource:",
-    "ms-appx-web:",
-    // Block Windows-specific URI schemes used in UWP/Electron which can be used
-    // for local file access or protocol-based attacks.
-    "ms-appx:",
-    "ms-appdata:",
-  ]
-  if (blockedProtocols.some((proto) => lowerUrl.startsWith(proto))) {
-    return false
-  }
-
-  // Block control characters and other dangerous characters that might be used for bypasses.
-  // We also block angle brackets and quotes to prevent HTML breakout and backslashes to
-  // prevent browser-specific path normalization bypasses.
-  // We also block backticks to prevent injection in template literals if this URL is used there.
-  // We also block parentheses, braces, and pipes to further mitigate XSS risks in dynamic contexts.
-  // We also block whitespace characters and zero-width/format Unicode characters to prevent bypasses.
-  // We include more specific Unicode characters like directional overrides and invisible separators.
-  // The expanded regex includes:
-  // - Ogham space mark (\u1680)
-  // - Mongolian vowel separator (\u180E)
-  // - En/Em quads/spaces and invisible characters (\u2000-\u200F)
-  // - Directional overrides (\u202A-\u202E) used to obfuscate protocols
-  // - Line/Paragraph separators and directional pop (\u2028-\u202F)
-  // - Medium mathematical space and word joiners (\u205F-\u206F)
-  // - Ideographic space (\u3000)
-  // - Zero-width non-breaking space / BOM (\uFEFF)
-  // eslint-disable-next-line no-control-regex
-  if (
-    /[\x00-\x1F\x7F-\x9F<>"'`()|{}\[\]\s\u00AD\u1680\u180E\u2000-\u200F\u202A-\u202E\u2028-\u202F\u205F-\u206F\u3000\uFEFF]/.test(
-      trimmedUrl,
-    )
-  ) {
-    return false
-  }
-
-  // Block backslashes in URLs as they can be used for bypasses in some browsers.
-  if (trimmedUrl.includes("\\")) {
-    return false
-  }
-
-  // Allow internal fragments
-  if (trimmedUrl.startsWith("#")) {
-    return true
-  }
-
-  // Allow relative paths and protocol-relative URLs (//), but block potential bypasses like /\
-  if (
-    trimmedUrl.startsWith("/") ||
-    trimmedUrl.startsWith("./") ||
-    trimmedUrl.startsWith("../")
-  ) {
-    // Block /\ which some browsers might treat as //
-    if (trimmedUrl.startsWith("/\\")) {
+  const result = (function () {
+    // Explicitly block dangerous protocols as a fail-safe.
+    if (BLOCKED_PROTOCOLS_REGEX.test(trimmedUrl)) {
       return false
     }
 
-    // If it's a protocol-relative URL (//), we should ensure it doesn't have a colon
-    // in the first segment of the host, unless it's a valid port number.
-    // This prevents edge cases like //javascript:alert(1) while allowing //example.com:8080
-    if (trimmedUrl.startsWith("//")) {
-      const hostPart = trimmedUrl.slice(2).split("/")[0]
-      if (hostPart?.includes(":") && !/^[a-zA-Z0-9.-]+:\d+$/.test(hostPart)) {
-        return false
-      }
-      // Also block entities and URL encoding in the host part of protocol-relative URLs
-      if (hostPart?.includes("&") || hostPart?.includes("%")) {
-        return false
-      }
+    // Block control characters and other dangerous characters.
+    if (DANGEROUS_CHARS_REGEX.test(trimmedUrl)) {
+      return false
     }
 
-    return true
-  }
+    // Block backslashes in URLs as they can be used for bypasses in some browsers.
+    if (trimmedUrl.includes("\\")) {
+      return false
+    }
 
-  // Detect and block protocol bypasses using HTML entities (e.g., javascript&colon;)
-  // or URL encoding (e.g., javascript%3a)
-  // We check the segment before the first /, ?, or #
-  const firstSegment = trimmedUrl.split(/[/?#]/)[0]
-  if (firstSegment.includes("&") || firstSegment.includes("%")) {
-    return false
-  }
+    // Allow internal fragments
+    if (trimmedUrl.startsWith("#")) {
+      return true
+    }
 
-  // Use URL constructor for robust protocol validation
-  try {
-    const parsed = new URL(trimmedUrl, "http://n")
-    const allowedProtocols = ["http:", "https:", "mailto:", "tel:"]
-    return allowedProtocols.includes(parsed.protocol)
-  } catch (e) {
-    // If it's not a valid absolute URL, check if it's a simple path without protocol
-    // Also ensures it doesn't contain a colon which could be a protocol
-    return !trimmedUrl.includes(":")
+    // Allow relative paths and protocol-relative URLs (//), but block potential bypasses like /\
+    if (
+      trimmedUrl.startsWith("/") ||
+      trimmedUrl.startsWith("./") ||
+      trimmedUrl.startsWith("../")
+    ) {
+      // Block /\ which some browsers might treat as //
+      if (trimmedUrl.startsWith("/\\")) {
+        return false
+      }
+
+      // If it's a protocol-relative URL (//), we should ensure it doesn't have a colon
+      // in the first segment of the host, unless it's a valid port number.
+      if (trimmedUrl.startsWith("//")) {
+        const hostPart = trimmedUrl.slice(2).split("/")[0]
+        if (hostPart?.includes(":") && !/^[a-zA-Z0-9.-]+:\d+$/.test(hostPart)) {
+          return false
+        }
+        // Also block entities and URL encoding in the host part of protocol-relative URLs
+        if (hostPart?.includes("&") || hostPart?.includes("%")) {
+          return false
+        }
+      }
+
+      return true
+    }
+
+    // Detect and block protocol bypasses using HTML entities or URL encoding
+    const firstSegment = trimmedUrl.split(/[/?#]/)[0]
+    if (firstSegment.includes("&") || firstSegment.includes("%")) {
+      return false
+    }
+
+    // Use URL constructor for robust protocol validation
+    try {
+      const parsed = new URL(trimmedUrl, "http://n")
+      const allowedProtocols = ["http:", "https:", "mailto:", "tel:"]
+      return allowedProtocols.includes(parsed.protocol)
+    } catch (e) {
+      // If it's not a valid absolute URL, check if it's a simple path without protocol
+      return !trimmedUrl.includes(":")
+    }
+  })()
+
+  // ⚡ Bolt: Update cache with new result.
+  if (safeUrlCache.size >= MAX_CACHE_SIZE) {
+    const firstKey = safeUrlCache.keys().next().value
+    if (firstKey !== undefined) safeUrlCache.delete(firstKey)
   }
+  safeUrlCache.set(url, result)
+
+  return result
 }
 
 /**
@@ -222,12 +225,11 @@ export function isSafeUrl(url: string | undefined | null): boolean {
  * @returns The safe JSON string.
  */
 export function safeJsonLd(obj: unknown): string {
-  return JSON.stringify(obj)
-    .replace(/</g, "\\u003c")
-    .replace(/>/g, "\\u003e")
-    .replace(/&/g, "\\u0026")
-    .replace(/\u2028/g, "\\u2028")
-    .replace(/\u2029/g, "\\u2029")
+  // ⚡ Bolt: Use a single-pass replacement for better performance.
+  return JSON.stringify(obj).replace(
+    JSON_LD_REPLACE_REGEX,
+    (match) => JSON_LD_REPLACE_MAP[match] || match,
+  )
 }
 
 /**
@@ -268,17 +270,7 @@ export function sanitizeCSSVariable(name: string): string {
     const sanitized = name.replace(/[^a-zA-Z0-9-_]/g, "").trim()
 
     // Block sensitive keys that could be used for prototype pollution
-    // This check is performed AFTER character sanitization to catch bypasses like "__proto__ "
-    const blockedKeys = [
-      "__proto__",
-      "constructor",
-      "prototype",
-      "__definegetter__",
-      "__definesetter__",
-      "__lookupgetter__",
-      "__lookupsetter__",
-    ]
-    if (blockedKeys.includes(sanitized.toLowerCase())) {
+    if (BLOCKED_KEYS.has(sanitized.toLowerCase())) {
       return ""
     }
 
