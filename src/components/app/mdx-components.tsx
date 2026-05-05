@@ -29,6 +29,19 @@ import {
 import { Pre } from "./pre"
 import ShadcnCliCommand from "./shadcn-cli-command"
 
+/**
+ * ⚡ Bolt: Cache for evaluated MDX components to avoid redundant work.
+ */
+const mdxCache = new Map<
+  string,
+  { Component: React.ComponentType<any>; TableOfContents: Toc }
+>()
+
+/**
+ * ⚡ Bolt: Maximum size for the MDX evaluation cache.
+ */
+const MAX_CACHE_SIZE = 100
+
 // ⚡ Bolt: Use dynamic import for ComponentPreview to break the static dependency
 // chain from the main bundle to the 50+ component examples.
 const ComponentPreview = dynamic(() => import("./component-preview"))
@@ -55,16 +68,31 @@ export const sharedComponents = {
 }
 
 // ⚡ Bolt: Export useMDXComponent so it can be reused in page components.
-// Optimized to only call the MDX function once.
+// Optimized to only call the MDX function once and cache the result globally.
 export const useMDXComponent = (code: string) => {
   return React.useMemo(() => {
     if (!code)
       return { Component: () => null, TableOfContents: [] as unknown as Toc }
+
+    // ⚡ Bolt: Return cached result if available.
+    if (mdxCache.has(code)) {
+      return mdxCache.get(code)!
+    }
+
     const exports = new Function(code)({ ...runtime })
-    return {
+    const result = {
       Component: exports.default,
       TableOfContents: exports.toc as Toc,
     }
+
+    // ⚡ Bolt: Update cache with new result and handle eviction.
+    if (mdxCache.size >= MAX_CACHE_SIZE) {
+      const firstKey = mdxCache.keys().next().value
+      if (firstKey !== undefined) mdxCache.delete(firstKey)
+    }
+    mdxCache.set(code, result)
+
+    return result
   }, [code])
 }
 

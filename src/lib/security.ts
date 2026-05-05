@@ -14,6 +14,41 @@ const cssVariableCache = new Map<string, string>()
 const MAX_CACHE_SIZE = 1000
 
 /**
+ * ⚡ Bolt: Hoisted regexes for performance optimization.
+ */
+const COLOR_VALIDATION_RE = /^[-a-zA-Z0-9#(),.%\s+*\/]+$/
+const COLOR_FUNCTION_RE = /([a-zA-Z-]+)\s*\(/g
+const URL_DANGEROUS_CHARS_RE =
+  /[\x00-\x1F\x7F-\x9F<>"'`()|{}\[\]\s\u00AD\u1680\u180E\u2000-\u200F\u202A-\u202E\u2028-\u202F\u205F-\u206F\u3000\uFEFF]/
+const URL_SPLIT_RE = /[/?#]/
+const URL_HOST_PORT_RE = /^[a-zA-Z0-9.-]+:\d+$/
+const JSON_LD_ESCAPE_RE = /[<>&\u2028\u2029]/g
+const CSS_VARIABLE_NAME_RE = /[^a-zA-Z0-9-_]/g
+const CSS_ESCAPE_RE = /[\\"\n<>]/g
+
+/**
+ * ⚡ Bolt: JSON-LD escape mapping for single-pass replacement.
+ */
+const JSON_LD_ESCAPES: Record<string, string> = {
+  "<": "\\u003c",
+  ">": "\\u003e",
+  "&": "\\u0026",
+  "\u2028": "\\u2028",
+  "\u2029": "\\u2029",
+}
+
+/**
+ * ⚡ Bolt: CSS escape mapping for single-pass replacement.
+ */
+const CSS_ESCAPES: Record<string, string> = {
+  "\\": "\\\\",
+  '"': '\\"',
+  "\n": " ",
+  "<": "\\3c ",
+  ">": "\\3e ",
+}
+
+/**
  * Sanitizes a color string for use in CSS variables.
  * Prevents injection of malicious CSS or HTML tags.
  *
@@ -39,7 +74,7 @@ export function sanitizeColor(color: string): string {
 
     // Allow only alphanumeric characters, spaces, and specific CSS punctuation used in color definitions.
     // Whitelist: a-z, A-Z, 0-9, space, #, %, ( ), ,, ., -, +, *, /
-    if (!/^[-a-zA-Z0-9#(),.%\s+*\/]+$/.test(color)) {
+    if (!COLOR_VALIDATION_RE.test(color)) {
       return ""
     }
 
@@ -49,7 +84,7 @@ export function sanitizeColor(color: string): string {
     }
 
     // Extract function names: word followed by (
-    const regex = /([a-zA-Z-]+)\s*\(/g
+    COLOR_FUNCTION_RE.lastIndex = 0
     let match
     const allowed = [
       "rgb",
@@ -66,7 +101,7 @@ export function sanitizeColor(color: string): string {
       "clamp",
     ]
 
-    while ((match = regex.exec(color)) !== null) {
+    while ((match = COLOR_FUNCTION_RE.exec(color)) !== null) {
       if (!allowed.includes(match[1].toLowerCase())) {
         return ""
       }
@@ -138,21 +173,8 @@ export function isSafeUrl(url: string | undefined | null): boolean {
   // We also block parentheses, braces, and pipes to further mitigate XSS risks in dynamic contexts.
   // We also block whitespace characters and zero-width/format Unicode characters to prevent bypasses.
   // We include more specific Unicode characters like directional overrides and invisible separators.
-  // The expanded regex includes:
-  // - Ogham space mark (\u1680)
-  // - Mongolian vowel separator (\u180E)
-  // - En/Em quads/spaces and invisible characters (\u2000-\u200F)
-  // - Directional overrides (\u202A-\u202E) used to obfuscate protocols
-  // - Line/Paragraph separators and directional pop (\u2028-\u202F)
-  // - Medium mathematical space and word joiners (\u205F-\u206F)
-  // - Ideographic space (\u3000)
-  // - Zero-width non-breaking space / BOM (\uFEFF)
   // eslint-disable-next-line no-control-regex
-  if (
-    /[\x00-\x1F\x7F-\x9F<>"'`()|{}\[\]\s\u00AD\u1680\u180E\u2000-\u200F\u202A-\u202E\u2028-\u202F\u205F-\u206F\u3000\uFEFF]/.test(
-      trimmedUrl,
-    )
-  ) {
+  if (URL_DANGEROUS_CHARS_RE.test(trimmedUrl)) {
     return false
   }
 
@@ -182,7 +204,7 @@ export function isSafeUrl(url: string | undefined | null): boolean {
     // This prevents edge cases like //javascript:alert(1) while allowing //example.com:8080
     if (trimmedUrl.startsWith("//")) {
       const hostPart = trimmedUrl.slice(2).split("/")[0]
-      if (hostPart?.includes(":") && !/^[a-zA-Z0-9.-]+:\d+$/.test(hostPart)) {
+      if (hostPart?.includes(":") && !URL_HOST_PORT_RE.test(hostPart)) {
         return false
       }
       // Also block entities and URL encoding in the host part of protocol-relative URLs
@@ -197,7 +219,7 @@ export function isSafeUrl(url: string | undefined | null): boolean {
   // Detect and block protocol bypasses using HTML entities (e.g., javascript&colon;)
   // or URL encoding (e.g., javascript%3a)
   // We check the segment before the first /, ?, or #
-  const firstSegment = trimmedUrl.split(/[/?#]/)[0]
+  const firstSegment = trimmedUrl.split(URL_SPLIT_RE)[0]
   if (firstSegment.includes("&") || firstSegment.includes("%")) {
     return false
   }
@@ -222,12 +244,10 @@ export function isSafeUrl(url: string | undefined | null): boolean {
  * @returns The safe JSON string.
  */
 export function safeJsonLd(obj: unknown): string {
-  return JSON.stringify(obj)
-    .replace(/</g, "\\u003c")
-    .replace(/>/g, "\\u003e")
-    .replace(/&/g, "\\u0026")
-    .replace(/\u2028/g, "\\u2028")
-    .replace(/\u2029/g, "\\u2029")
+  return JSON.stringify(obj).replace(
+    JSON_LD_ESCAPE_RE,
+    (match) => JSON_LD_ESCAPES[match],
+  )
 }
 
 /**
@@ -238,12 +258,7 @@ export function safeJsonLd(obj: unknown): string {
  * @returns The escaped string.
  */
 export function escapeCSSString(str: string): string {
-  return str
-    .replace(/\\/g, "\\\\")
-    .replace(/"/g, '\\"')
-    .replace(/\n/g, " ")
-    .replace(/</g, "\\3c ")
-    .replace(/>/g, "\\3e ")
+  return str.replace(CSS_ESCAPE_RE, (match) => CSS_ESCAPES[match])
 }
 
 /**
@@ -265,7 +280,7 @@ export function sanitizeCSSVariable(name: string): string {
 
   const result = (function () {
     // Remove invalid characters and trim to prevent bypasses
-    const sanitized = name.replace(/[^a-zA-Z0-9-_]/g, "").trim()
+    const sanitized = name.replace(CSS_VARIABLE_NAME_RE, "").trim()
 
     // Block sensitive keys that could be used for prototype pollution
     // This check is performed AFTER character sanitization to catch bypasses like "__proto__ "
