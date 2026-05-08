@@ -54,17 +54,41 @@ export const sharedComponents = {
   TableRow,
 }
 
+// ⚡ Bolt: Global cache for evaluated MDX components to avoid redundant
+// calls to `new Function(code)`, significantly speeding up client-side
+// navigation between documentation pages.
+const mdxCache = new Map<
+  string,
+  { Component: React.ComponentType<any>; TableOfContents: Toc }
+>()
+const MAX_CACHE_SIZE = 100
+
 // ⚡ Bolt: Export useMDXComponent so it can be reused in page components.
-// Optimized to only call the MDX function once.
+// Optimized to only call the MDX function once and use a global cache.
 export const useMDXComponent = (code: string) => {
   return React.useMemo(() => {
     if (!code)
       return { Component: () => null, TableOfContents: [] as unknown as Toc }
+
+    // ⚡ Bolt: Return cached MDX component if available.
+    if (mdxCache.has(code)) {
+      return mdxCache.get(code)!
+    }
+
     const exports = new Function(code)({ ...runtime })
-    return {
+    const result = {
       Component: exports.default,
       TableOfContents: exports.toc as Toc,
     }
+
+    // ⚡ Bolt: Update cache with new result and enforce MAX_CACHE_SIZE.
+    if (mdxCache.size >= MAX_CACHE_SIZE) {
+      const firstKey = mdxCache.keys().next().value
+      if (firstKey !== undefined) mdxCache.delete(firstKey)
+    }
+    mdxCache.set(code, result)
+
+    return result
   }, [code])
 }
 
