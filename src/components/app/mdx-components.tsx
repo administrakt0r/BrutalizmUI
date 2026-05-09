@@ -90,6 +90,15 @@ export const useMDXComponent = (code: string) => {
       Component: exports.default,
       TableOfContents: exports.toc as Toc,
     }
+
+    // ⚡ Bolt: Store result in cache with eviction logic.
+    if (mdxCache.size >= MAX_CACHE_SIZE) {
+      const firstKey = mdxCache.keys().next().value
+      if (firstKey !== undefined) mdxCache.delete(firstKey)
+    }
+    mdxCache.set(code, result)
+
+    return result
   }, [code])
 }
 

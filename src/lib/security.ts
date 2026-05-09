@@ -14,6 +14,84 @@ const cssVariableCache = new Map<string, string>()
 const MAX_CACHE_SIZE = 1000
 
 /**
+ * ⚡ Bolt: Hoisted constants and regexes for performance optimization.
+ */
+const ALLOWED_COLOR_FUNCTIONS = new Set([
+  "rgb",
+  "rgba",
+  "hsl",
+  "hsla",
+  "oklch",
+  "var",
+  "color-mix",
+  "light-dark",
+  "calc",
+  "min",
+  "max",
+  "clamp",
+])
+
+const COLOR_FUNCTION_REGEX = /([a-zA-Z-]+)\s*\(/
+
+const BLOCKED_PROTOCOLS = [
+  "javascript:",
+  "data:",
+  "blob:",
+  "file:",
+  "ftp:",
+  "about:",
+  "chrome:",
+  "config:",
+  "view-source:",
+  "resource:",
+  "vbscript:",
+  "tcl:",
+  "ms-help:",
+  "filesystem:",
+  "jar:",
+  "wyciwyg:",
+  "mediasource:",
+  "ms-appx-web:",
+  "ms-appx:",
+  "ms-appdata:",
+]
+
+const ALLOWED_URL_PROTOCOLS = ["http:", "https:", "mailto:", "tel:"]
+
+const DANGEROUS_CHARS_REGEX =
+  /[\x00-\x1F\x7F-\x9F<>"'`()|{}\[\]\s\u00AD\u1680\u180E\u2000-\u200F\u202A-\u202E\u2028-\u202F\u205F-\u206F\u3000\uFEFF]/
+
+const BLOCKED_PROTO_KEYS = new Set([
+  "__proto__",
+  "constructor",
+  "prototype",
+  "__definegetter__",
+  "__definesetter__",
+  "__lookupgetter__",
+  "__lookupsetter__",
+])
+
+const CSS_VARIABLE_NAME_REGEX = /[^a-zA-Z0-9-_]/g
+
+const JSON_LD_ESCAPE_REGEX = /[<>&\u2028\u2029]/g
+const JSON_LD_ESCAPE_MAP: Record<string, string> = {
+  "<": "\\u003c",
+  ">": "\\u003e",
+  "&": "\\u0026",
+  "\u2028": "\\u2028",
+  "\u2029": "\\u2029",
+}
+
+const CSS_STRING_ESCAPE_REGEX = /[\\"\n<>]/g
+const CSS_STRING_ESCAPE_MAP: Record<string, string> = {
+  "\\": "\\\\",
+  '"': '\\"',
+  "\n": " ",
+  "<": "\\3c ",
+  ">": "\\3e ",
+}
+
+/**
  * Sanitizes a color string for use in CSS variables.
  * Prevents injection of malicious CSS or HTML tags.
  *
@@ -48,26 +126,11 @@ export function sanitizeColor(color: string): string {
       return ""
     }
 
-    // Extract function names: word followed by (
-    const regex = /([a-zA-Z-]+)\s*\(/g
+    // ⚡ Bolt: Extract function names and validate against the hoisted whitelist.
     let match
-    const allowed = [
-      "rgb",
-      "rgba",
-      "hsl",
-      "hsla",
-      "oklch",
-      "var",
-      "color-mix",
-      "light-dark",
-      "calc",
-      "min",
-      "max",
-      "clamp",
-    ]
-
-    while ((match = regex.exec(color)) !== null) {
-      if (!allowed.includes(match[1].toLowerCase())) {
+    COLOR_FUNCTION_REGEX.lastIndex = 0
+    while ((match = COLOR_FUNCTION_REGEX.exec(color)) !== null) {
+      if (!ALLOWED_COLOR_FUNCTIONS.has(match[1].toLowerCase())) {
         return ""
       }
     }
@@ -103,56 +166,12 @@ export function isSafeUrl(url: string | undefined | null): boolean {
   // Explicitly block dangerous protocols as a fail-safe.
   // data: and blob: can be used for XSS in link contexts.
   const lowerUrl = trimmedUrl.toLowerCase()
-  const blockedProtocols = [
-    "javascript:",
-    "data:",
-    "blob:",
-    "file:",
-    "ftp:",
-    "about:",
-    "chrome:",
-    "config:",
-    "view-source:",
-    "resource:",
-    "vbscript:",
-    "tcl:",
-    "ms-help:",
-    "filesystem:",
-    "jar:",
-    "wyciwyg:",
-    "mediasource:",
-    "ms-appx-web:",
-    // Block Windows-specific URI schemes used in UWP/Electron which can be used
-    // for local file access or protocol-based attacks.
-    "ms-appx:",
-    "ms-appdata:",
-  ]
-  if (blockedProtocols.some((proto) => lowerUrl.startsWith(proto))) {
+  if (BLOCKED_PROTOCOLS.some((proto) => lowerUrl.startsWith(proto))) {
     return false
   }
 
-  // Block control characters and other dangerous characters that might be used for bypasses.
-  // We also block angle brackets and quotes to prevent HTML breakout and backslashes to
-  // prevent browser-specific path normalization bypasses.
-  // We also block backticks to prevent injection in template literals if this URL is used there.
-  // We also block parentheses, braces, and pipes to further mitigate XSS risks in dynamic contexts.
-  // We also block whitespace characters and zero-width/format Unicode characters to prevent bypasses.
-  // We include more specific Unicode characters like directional overrides and invisible separators.
-  // The expanded regex includes:
-  // - Ogham space mark (\u1680)
-  // - Mongolian vowel separator (\u180E)
-  // - En/Em quads/spaces and invisible characters (\u2000-\u200F)
-  // - Directional overrides (\u202A-\u202E) used to obfuscate protocols
-  // - Line/Paragraph separators and directional pop (\u2028-\u202F)
-  // - Medium mathematical space and word joiners (\u205F-\u206F)
-  // - Ideographic space (\u3000)
-  // - Zero-width non-breaking space / BOM (\uFEFF)
-  // eslint-disable-next-line no-control-regex
-  if (
-    /[\x00-\x1F\x7F-\x9F<>"'`()|{}\[\]\s\u00AD\u1680\u180E\u2000-\u200F\u202A-\u202E\u2028-\u202F\u205F-\u206F\u3000\uFEFF]/.test(
-      trimmedUrl,
-    )
-  ) {
+  // ⚡ Bolt: Block control characters and other dangerous characters using hoisted regex.
+  if (DANGEROUS_CHARS_REGEX.test(trimmedUrl)) {
     return false
   }
 
@@ -205,8 +224,7 @@ export function isSafeUrl(url: string | undefined | null): boolean {
   // Use URL constructor for robust protocol validation
   try {
     const parsed = new URL(trimmedUrl, "http://n")
-    const allowedProtocols = ["http:", "https:", "mailto:", "tel:"]
-    return allowedProtocols.includes(parsed.protocol)
+    return ALLOWED_URL_PROTOCOLS.includes(parsed.protocol)
   } catch (e) {
     // If it's not a valid absolute URL, check if it's a simple path without protocol
     // Also ensures it doesn't contain a colon which could be a protocol
@@ -222,12 +240,11 @@ export function isSafeUrl(url: string | undefined | null): boolean {
  * @returns The safe JSON string.
  */
 export function safeJsonLd(obj: unknown): string {
-  return JSON.stringify(obj)
-    .replace(/</g, "\\u003c")
-    .replace(/>/g, "\\u003e")
-    .replace(/&/g, "\\u0026")
-    .replace(/\u2028/g, "\\u2028")
-    .replace(/\u2029/g, "\\u2029")
+  // ⚡ Bolt: Use single-pass regex replacement to optimize string sanitization.
+  return JSON.stringify(obj).replace(
+    JSON_LD_ESCAPE_REGEX,
+    (m) => JSON_LD_ESCAPE_MAP[m],
+  )
 }
 
 /**
@@ -238,12 +255,8 @@ export function safeJsonLd(obj: unknown): string {
  * @returns The escaped string.
  */
 export function escapeCSSString(str: string): string {
-  return str
-    .replace(/\\/g, "\\\\")
-    .replace(/"/g, '\\"')
-    .replace(/\n/g, " ")
-    .replace(/</g, "\\3c ")
-    .replace(/>/g, "\\3e ")
+  // ⚡ Bolt: Use single-pass regex replacement to optimize string sanitization.
+  return str.replace(CSS_STRING_ESCAPE_REGEX, (m) => CSS_STRING_ESCAPE_MAP[m])
 }
 
 /**
@@ -264,21 +277,11 @@ export function sanitizeCSSVariable(name: string): string {
   }
 
   const result = (function () {
-    // Remove invalid characters and trim to prevent bypasses
-    const sanitized = name.replace(/[^a-zA-Z0-9-_]/g, "").trim()
+    // ⚡ Bolt: Remove invalid characters and trim using hoisted regex.
+    const sanitized = name.replace(CSS_VARIABLE_NAME_REGEX, "").trim()
 
-    // Block sensitive keys that could be used for prototype pollution
-    // This check is performed AFTER character sanitization to catch bypasses like "__proto__ "
-    const blockedKeys = [
-      "__proto__",
-      "constructor",
-      "prototype",
-      "__definegetter__",
-      "__definesetter__",
-      "__lookupgetter__",
-      "__lookupsetter__",
-    ]
-    if (blockedKeys.includes(sanitized.toLowerCase())) {
+    // ⚡ Bolt: Block sensitive keys against hoisted prototype pollution list.
+    if (BLOCKED_PROTO_KEYS.has(sanitized.toLowerCase())) {
       return ""
     }
 
