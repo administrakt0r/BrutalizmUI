@@ -297,6 +297,12 @@ const softwareSourceCodeJsonLd = {
   targetProduct: { "@id": "https://brutalizmui.pages.dev/#software" },
 }
 
+// ⚡ Bolt: Pre-calculate sanitized JSON-LD strings at the module level to eliminate
+// redundant stringification and regex replacements during every React render cycle.
+const softwareAppJsonLdStr = safeJsonLd(softwareAppJsonLd)
+const organizationJsonLdStr = safeJsonLd(organizationJsonLd)
+const softwareSourceCodeJsonLdStr = safeJsonLd(softwareSourceCodeJsonLd)
+
 export default function RootLayout({
   children,
 }: {
@@ -308,16 +314,16 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: stylingScript }} />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: safeJsonLd(softwareAppJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: softwareAppJsonLdStr }}
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: safeJsonLd(organizationJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: organizationJsonLdStr }}
         />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: safeJsonLd(softwareSourceCodeJsonLd),
+            __html: softwareSourceCodeJsonLdStr,
           }}
         />
       </head>
