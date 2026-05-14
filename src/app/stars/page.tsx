@@ -67,12 +67,15 @@ const collectionPageJsonLd = {
   },
 }
 
+// ⚡ Bolt: Pre-calculate sanitized JSON-LD strings at the module level.
+const collectionPageJsonLdStr = safeJsonLd(collectionPageJsonLd)
+
 export default function Page() {
   return (
     <PageWrapper>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLd(collectionPageJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: collectionPageJsonLdStr }}
       />
       <PageHeader>
         <PageHeading>Stars</PageHeading>

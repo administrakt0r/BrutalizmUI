@@ -33,30 +33,16 @@ const ALLOWED_COLOR_FUNCTIONS = new Set([
 
 const COLOR_FUNCTION_REGEX = /([a-zA-Z-]+)\s*\(/
 
-const BLOCKED_PROTOCOLS = [
-  "javascript:",
-  "data:",
-  "blob:",
-  "file:",
-  "ftp:",
-  "about:",
-  "chrome:",
-  "config:",
-  "view-source:",
-  "resource:",
-  "vbscript:",
-  "tcl:",
-  "ms-help:",
-  "filesystem:",
-  "jar:",
-  "wyciwyg:",
-  "mediasource:",
-  "ms-appx-web:",
-  "ms-appx:",
-  "ms-appdata:",
-]
+/**
+ * ⚡ Bolt: Hoisted regex for faster case-insensitive protocol validation.
+ */
+const BLOCKED_PROTOCOLS_REGEX =
+  /^(?:javascript|data|blob|file|ftp|about|chrome|config|view-source|resource|vbscript|tcl|ms-help|filesystem|jar|wyciwyg|mediasource|ms-appx-web|ms-appx|ms-appdata):/i
 
-const ALLOWED_URL_PROTOCOLS = ["http:", "https:", "mailto:", "tel:"]
+/**
+ * ⚡ Bolt: Use a Set for O(1) protocol lookups.
+ */
+const ALLOWED_URL_PROTOCOLS = new Set(["http:", "https:", "mailto:", "tel:"])
 
 const DANGEROUS_CHARS_REGEX =
   /[\x00-\x1F\x7F-\x9F<>"'`()|{}\[\]\s\u00AD\u1680\u180E\u2000-\u200F\u202A-\u202E\u2028-\u202F\u205F-\u206F\u3000\uFEFF]/
@@ -163,10 +149,9 @@ export function isSafeUrl(url: string | undefined | null): boolean {
   }
   const trimmedUrl = url.trim()
 
-  // Explicitly block dangerous protocols as a fail-safe.
+  // Explicitly block dangerous protocols as a fail-safe using hoisted regex.
   // data: and blob: can be used for XSS in link contexts.
-  const lowerUrl = trimmedUrl.toLowerCase()
-  if (BLOCKED_PROTOCOLS.some((proto) => lowerUrl.startsWith(proto))) {
+  if (BLOCKED_PROTOCOLS_REGEX.test(trimmedUrl)) {
     return false
   }
 
@@ -224,7 +209,7 @@ export function isSafeUrl(url: string | undefined | null): boolean {
   // Use URL constructor for robust protocol validation
   try {
     const parsed = new URL(trimmedUrl, "http://n")
-    return ALLOWED_URL_PROTOCOLS.includes(parsed.protocol)
+    return ALLOWED_URL_PROTOCOLS.has(parsed.protocol)
   } catch (e) {
     // If it's not a valid absolute URL, check if it's a simple path without protocol
     // Also ensures it doesn't contain a colon which could be a protocol

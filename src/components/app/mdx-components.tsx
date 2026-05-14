@@ -29,6 +29,9 @@ import {
 import { Pre } from "./pre"
 import ShadcnCliCommand from "./shadcn-cli-command"
 
+// ⚡ Bolt: Hoist MDX runtime to the module level to avoid repeated object spreading.
+const runtimeWithExports = { ...runtime }
+
 // ⚡ Bolt: Use dynamic import for ComponentPreview to break the static dependency
 // chain from the main bundle to the 50+ component examples.
 const ComponentPreview = dynamic(() => import("./component-preview"))
@@ -57,9 +60,13 @@ export const sharedComponents = {
 /**
  * ⚡ Bolt: Global cache for evaluated MDX components to prevent redundant
  * 'new Function()' calls when navigating between pages or during re-renders.
+ * Stores the final result object to ensure stable references across the app.
  */
 const MAX_CACHE_SIZE = 100
-const mdxCache = new Map<string, any>()
+const mdxCache = new Map<
+  string,
+  { Component: React.ComponentType<any>; TableOfContents: Toc }
+>()
 
 // ⚡ Bolt: Export useMDXComponent so it can be reused in page components.
 // Optimized to only call the MDX function once and cache the result globally.
@@ -70,28 +77,16 @@ export const useMDXComponent = (code: string) => {
 
     // ⚡ Bolt: Check global cache first.
     if (mdxCache.has(code)) {
-      const cached = mdxCache.get(code)
-      return {
-        Component: cached.default,
-        TableOfContents: cached.toc as Toc,
-      }
+      return mdxCache.get(code)!
     }
 
-    const exports = new Function(code)({ ...runtime })
-
-    // ⚡ Bolt: Implement FIFO eviction for the MDX cache.
-    if (mdxCache.size >= MAX_CACHE_SIZE) {
-      const firstKey = mdxCache.keys().next().value
-      if (firstKey !== undefined) mdxCache.delete(firstKey)
-    }
-    mdxCache.set(code, exports)
-
-    return {
+    const exports = new Function(code)(runtimeWithExports)
+    const result = {
       Component: exports.default,
       TableOfContents: exports.toc as Toc,
     }
 
-    // ⚡ Bolt: Store result in cache with eviction logic.
+    // ⚡ Bolt: Implement FIFO eviction for the MDX cache.
     if (mdxCache.size >= MAX_CACHE_SIZE) {
       const firstKey = mdxCache.keys().next().value
       if (firstKey !== undefined) mdxCache.delete(firstKey)
