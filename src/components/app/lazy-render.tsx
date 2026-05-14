@@ -8,9 +8,18 @@ export type LazyRenderProps = React.ComponentPropsWithoutRef<"div"> & {
   rootMargin?: string
 }
 
+// ⚡ Bolt: Shared IntersectionObserver pool keyed by rootMargin to minimize browser resource usage.
+// On pages with many lazy-rendered components (like Stars or Charts), this prevents
+// creating dozens of duplicate observer instances, reducing main-thread overhead.
+const observers = new Map<string, IntersectionObserver>()
+
+// ⚡ Bolt: WeakMap to associate DOM elements with their respective state-update callbacks.
+// WeakMap ensures that entries are automatically garbage collected when elements are removed.
+const callbacks = new WeakMap<Element, () => void>()
+
 /**
  * A wrapper component that delays rendering its children until it intersects with the viewport.
- * Uses the `IntersectionObserver` API to monitor visibility, which improves initial load times
+ * Uses a shared `IntersectionObserver` pool to monitor visibility, which improves initial load times
  * and time-to-interactive for pages with large amounts of off-screen content.
  *
  * @param {React.ReactNode} props.children - The child components to lazily render.
@@ -28,20 +37,41 @@ const LazyRender = React.memo(
       React.useImperativeHandle(ref, () => internalRef.current as HTMLDivElement)
 
       React.useEffect(() => {
-        // ⚡ Bolt: `IntersectionObserver` avoids heavy rendering of off-screen components.
-        const observer = new IntersectionObserver(
-          ([entry]) => {
-            if (entry.isIntersecting) {
-              setInView(true)
-              // Disconnect immediately after intersecting to prevent further observer callbacks.
-              observer.disconnect()
-            }
-          },
-          { rootMargin },
-        )
-        if (internalRef.current) observer.observe(internalRef.current)
-        return () => observer.disconnect()
-      }, [rootMargin])
+        // ⚡ Bolt: Early exit if already in view or element is not yet available.
+        if (inView || !internalRef.current) return
+
+        const el = internalRef.current
+
+        // ⚡ Bolt: Initialize or retrieve a shared observer for the specified rootMargin.
+        let observer = observers.get(rootMargin)
+        if (!observer) {
+          observer = new IntersectionObserver(
+            (entries, obs) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  const callback = callbacks.get(entry.target)
+                  if (callback) {
+                    callback()
+                    callbacks.delete(entry.target)
+                    obs.unobserve(entry.target)
+                  }
+                }
+              })
+            },
+            { rootMargin },
+          )
+          observers.set(rootMargin, observer)
+        }
+
+        callbacks.set(el, () => setInView(true))
+        observer.observe(el)
+
+        return () => {
+          callbacks.delete(el)
+          // Always unobserve on cleanup to prevent memory leaks.
+          observer?.unobserve(el)
+        }
+      }, [rootMargin, inView])
 
       return (
         <div
