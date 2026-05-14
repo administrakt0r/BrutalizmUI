@@ -108,78 +108,81 @@ export function DocPageContent({ doc }: { doc: Doc }) {
 
   const isTocEmpty = tableOfContents.length < 2
 
-  // ⚡ Bolt: Memoize JSON-LD objects to prevent redundant object creation on every render.
-  const techArticleJsonLd = React.useMemo(
-    () => ({
-      "@context": "https://schema.org",
-      "@type": "TechArticle",
-      headline: title,
-      description: `Technical documentation for the BrutalizmUI ${title} component. Built with React and Tailwind CSS, this neobrutalism primitive is optimized for accessibility and performance. ${description}`,
-      image: "https://brutalizmui.pages.dev/preview.png",
-      author: {
-        "@type": "Person",
-        name: "Samuel Breznjak",
-        url: "https://github.com/ekmas",
-      },
-      publisher: {
-        "@type": "Organization",
-        name: "BrutalizmUI",
-        logo: {
-          "@type": "ImageObject",
-          url: "https://brutalizmui.pages.dev/favicon.ico",
+  // ⚡ Bolt: Memoize JSON-LD strings to eliminate redundant stringification and regex
+  // replacements during every React render cycle. Sanitization only happens when dependencies change.
+  const techArticleJsonLdStr = React.useMemo(
+    () =>
+      safeJsonLd({
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        headline: title,
+        description: `Technical documentation for the BrutalizmUI ${title} component. Built with React and Tailwind CSS, this neobrutalism primitive is optimized for accessibility and performance. ${description}`,
+        image: "https://brutalizmui.pages.dev/preview.png",
+        author: {
+          "@type": "Person",
+          name: "Samuel Breznjak",
+          url: "https://github.com/ekmas",
         },
-      },
-      url: `https://brutalizmui.pages.dev/docs/${slugAsParams}`,
-      mainEntityOfPage: {
-        "@type": "WebPage",
-        "@id": `https://brutalizmui.pages.dev/docs/${slugAsParams}`,
-      },
-      datePublished: "2024-03-01T00:00:00Z",
-      dateModified: "2026-03-18T00:00:00Z",
-      keywords:
-        "neobrutalism, react, tailwind css, shadcn/ui, " + title.toLowerCase(),
-      articleSection: "Documentation",
-      educationalLevel: "Beginner/Intermediate",
-      proficiencyLevel: "Beginner",
-    }),
+        publisher: {
+          "@type": "Organization",
+          name: "BrutalizmUI",
+          logo: {
+            "@type": "ImageObject",
+            url: "https://brutalizmui.pages.dev/favicon.ico",
+          },
+        },
+        url: `https://brutalizmui.pages.dev/docs/${slugAsParams}`,
+        mainEntityOfPage: {
+          "@type": "WebPage",
+          "@id": `https://brutalizmui.pages.dev/docs/${slugAsParams}`,
+        },
+        datePublished: "2024-03-01T00:00:00Z",
+        dateModified: "2026-03-18T00:00:00Z",
+        keywords:
+          "neobrutalism, react, tailwind css, shadcn/ui, " + title.toLowerCase(),
+        articleSection: "Documentation",
+        educationalLevel: "Beginner/Intermediate",
+        proficiencyLevel: "Beginner",
+      }),
     [title, description, slugAsParams],
   )
 
-  const breadcrumbJsonLd = React.useMemo(
-    () => ({
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        {
-          "@type": "ListItem",
-          position: 1,
-          name: "Home",
-          item: "https://brutalizmui.pages.dev/",
-        },
-        {
-          "@type": "ListItem",
-          position: 2,
-          name: "Docs",
-          item: "https://brutalizmui.pages.dev/docs",
-        },
-        ...(slugAsParams !== ""
-          ? [
-              {
-                "@type": "ListItem",
-                position: 3,
-                name: title,
-                item: `https://brutalizmui.pages.dev/docs/${slugAsParams}`,
-              },
-            ]
-          : []),
-      ],
-    }),
+  const breadcrumbJsonLdStr = React.useMemo(
+    () =>
+      safeJsonLd({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: "https://brutalizmui.pages.dev/",
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Docs",
+            item: "https://brutalizmui.pages.dev/docs",
+          },
+          ...(slugAsParams !== ""
+            ? [
+                {
+                  "@type": "ListItem",
+                  position: 3,
+                  name: title,
+                  item: `https://brutalizmui.pages.dev/docs/${slugAsParams}`,
+                },
+              ]
+            : []),
+        ],
+      }),
     [title, slugAsParams],
   )
 
-  const faqJsonLd = React.useMemo(() => {
+  const faqJsonLdStr = React.useMemo(() => {
     if (slugAsParams === "installation") {
-      return {
+      return safeJsonLd({
         "@context": "https://schema.org",
         "@type": "FAQPage",
         mainEntity: [
@@ -208,10 +211,10 @@ export function DocPageContent({ doc }: { doc: Doc }) {
             },
           },
         ],
-      }
+      })
     }
     if (slugAsParams === "") {
-      return {
+      return safeJsonLd({
         "@context": "https://schema.org",
         "@type": "FAQPage",
         mainEntity: [
@@ -232,43 +235,42 @@ export function DocPageContent({ doc }: { doc: Doc }) {
             },
           },
         ],
-      }
+      })
     }
     return null
   }, [slugAsParams])
 
-  const howToJsonLd = React.useMemo(
-    () =>
-      slugAsParams === "installation"
-        ? {
-            "@context": "https://schema.org",
-            "@type": "HowTo",
-            name: "How to Install BrutalizmUI",
-            description:
-              "Follow these steps to integrate BrutalizmUI neobrutalism components into your React project.",
-            step: [
-              {
-                "@type": "HowToStep",
-                name: "Initialize Shadcn/ui",
-                text: "Initialize your project with shadcn/ui by following the official CLI guide.",
-                url: "https://ui.shadcn.com/docs/cli#init",
-              },
-              {
-                "@type": "HowToStep",
-                name: "Add Neobrutalism Styling",
-                text: "Delete existing global styles and paste the desired neobrutalism CSS variables from the BrutalizmUI styling page.",
-                url: "https://brutalizmui.pages.dev/styling",
-              },
-              {
-                "@type": "HowToStep",
-                name: "Install Components",
-                text: "Use the Shadcn CLI to add specific components or copy the source code manually into your project.",
-              },
-            ],
-          }
-        : null,
-    [slugAsParams],
-  )
+  const howToJsonLdStr = React.useMemo(() => {
+    if (slugAsParams === "installation") {
+      return safeJsonLd({
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        name: "How to Install BrutalizmUI",
+        description:
+          "Follow these steps to integrate BrutalizmUI neobrutalism components into your React project.",
+        step: [
+          {
+            "@type": "HowToStep",
+            name: "Initialize Shadcn/ui",
+            text: "Initialize your project with shadcn/ui by following the official CLI guide.",
+            url: "https://ui.shadcn.com/docs/cli#init",
+          },
+          {
+            "@type": "HowToStep",
+            name: "Add Neobrutalism Styling",
+            text: "Delete existing global styles and paste the desired neobrutalism CSS variables from the BrutalizmUI styling page.",
+            url: "https://brutalizmui.pages.dev/styling",
+          },
+          {
+            "@type": "HowToStep",
+            name: "Install Components",
+            text: "Use the Shadcn CLI to add specific components or copy the source code manually into your project.",
+          },
+        ],
+      })
+    }
+    return null
+  }, [slugAsParams])
 
   return (
     <main
@@ -277,22 +279,22 @@ export function DocPageContent({ doc }: { doc: Doc }) {
     >
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLd(techArticleJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: techArticleJsonLdStr }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: breadcrumbJsonLdStr }}
       />
-      {faqJsonLd && (
+      {faqJsonLdStr && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: faqJsonLdStr }}
         />
       )}
-      {howToJsonLd && (
+      {howToJsonLdStr && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: safeJsonLd(howToJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: howToJsonLdStr }}
         />
       )}
       <div className="lg:ml-[250px] xl:mr-[250px] mr-0 ml-0 prose-p:text-foreground prose-p:mt-6 prose-headings:scroll-mt-32 prose-h1:mb-4 prose-ul:pl-5 prose-ul:list-disc prose-li:font-base sm:prose-li:text-base prose-li:text-sm prose-li:mt-2 lg:py-20 sm:py-16 py-12 leading-relaxed prose-h2:mt-10 prose-h2:mb-6 prose-h3:mt-8 prose-headings:font-heading sm:prose-h1:text-3xl prose-h1:text-2xl sm:prose-h2:text-2xl prose-h2:text-xl prose-h3:mb-6 sm:prose-h3:text-xl prose-h3:text-lg prose-p:leading-7 sm:prose-p:text-base prose-p:text-sm prose-p:font-base prose-code:px-[5px] prose-code:py-[3px] prose-a:underline prose-a:font-heading prose-code:rounded-base prose-code:font-bold prose-code:border prose-code:text-main-foreground prose-code:break-normal prose-code:text-sm prose-code:mx-0.5 prose-code:border-border prose-code:bg-main">

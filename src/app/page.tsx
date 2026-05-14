@@ -205,20 +205,25 @@ const REVIEWS_JSON_LD = {
 
 const MARQUEE_ITEMS = Array.from({ length: 7 })
 
+// ⚡ Bolt: Pre-calculate sanitized JSON-LD strings at the module level.
+const webPageJsonLdStr = safeJsonLd(WEB_PAGE_JSON_LD)
+const faqJsonLdStr = safeJsonLd(FAQ_JSON_LD)
+const reviewsJsonLdStr = safeJsonLd(REVIEWS_JSON_LD)
+
 export default function Home() {
   return (
     <div className="text-foreground font-base prose-headings:font-heading prose-h1:2xl:text-6xl prose-h1:xl:text-5xl prose-h1:md:text-5xl prose-h1:sm:text-[33px] prose-h1:text-2xl prose-h2:2xl:text-4xl prose-h2:lg:text-4xl prose-h2:md:text-3xl prose-h2:text-2xl prose-h3:2xl:text-4xl prose-h3:xl:text-3xl prose-h3:lg:text-3xl prose-h3:md:text-2xl prose-h3:sm:text-xl">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLd(WEB_PAGE_JSON_LD) }}
+        dangerouslySetInnerHTML={{ __html: webPageJsonLdStr }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLd(FAQ_JSON_LD) }}
+        dangerouslySetInnerHTML={{ __html: faqJsonLdStr }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLd(REVIEWS_JSON_LD) }}
+        dangerouslySetInnerHTML={{ __html: reviewsJsonLdStr }}
       />
       <main
         id="main-content"

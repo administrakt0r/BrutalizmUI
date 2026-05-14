@@ -29,6 +29,9 @@ import {
 import { Pre } from "./pre"
 import ShadcnCliCommand from "./shadcn-cli-command"
 
+// ⚡ Bolt: Hoist MDX runtime to the module level to avoid repeated object spreading.
+const runtimeWithExports = { ...runtime }
+
 // ⚡ Bolt: Use dynamic import for ComponentPreview to break the static dependency
 // chain from the main bundle to the 50+ component examples.
 const ComponentPreview = dynamic(() => import("./component-preview"))
