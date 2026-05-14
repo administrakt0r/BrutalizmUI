@@ -31,7 +31,7 @@ const ALLOWED_COLOR_FUNCTIONS = new Set([
   "clamp",
 ])
 
-const COLOR_FUNCTION_REGEX = /([a-zA-Z-]+)\s*\(/
+const COLOR_FUNCTION_REGEX = /([a-zA-Z-]+)\s*\(/g
 
 /**
  * ⚡ Bolt: Hoisted regex for faster case-insensitive protocol validation.
