@@ -39,12 +39,16 @@ const collectionPageJsonLd = {
   },
 }
 
+// ⚡ Bolt: Pre-calculate sanitized JSON-LD strings at the module level to eliminate
+// redundant stringification and regex replacements during every React render cycle.
+const collectionPageJsonLdStr = safeJsonLd(collectionPageJsonLd)
+
 export default function Page() {
   return (
     <PageWrapper>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLd(collectionPageJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: collectionPageJsonLdStr }}
       />
       <PageHeader>
         <PageHeading>Templates</PageHeading>
